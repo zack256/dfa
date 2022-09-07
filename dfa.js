@@ -69,10 +69,10 @@ function formatDeltaGivenNameMatrix (givenDelta, state2Idx, letter2Idx) {
             if (!state2Idx.has(givenDelta[i][j])) {
                 err("Entry " + givenDelta[i][j] + " not found in states provided!");
             }
-            deltaMatrix[i].push(givenDelta[i][j]);
+            deltaMatrix[i].push(state2Idx.get(givenDelta[i][j]));
         }
     }
-    return formatDeltaGivenNumberMatrix(givenDelta, state2Idx, letter2Idx);
+    return formatDeltaGivenNumberMatrix(deltaMatrix, state2Idx, letter2Idx);
 }
 
 function formatStartingState (startingState, state2Idx) {
@@ -101,18 +101,37 @@ class DFA {
         var res;
         res = formatStates(states);
         this.states = res[0];
-        var state2Idx = res[1];
+        this.state2Idx = res[1];
         res = formatAlphabet(alphabet);
         this.alphabet = res[0];
-        var letter2Idx = res[1];
-        this.delta = formatDeltaGivenNameMatrix(delta, state2Idx, letter2Idx);
-        this.startingState = formatStartingState(startingState, state2Idx);
-        this.acceptingStates = formatAcceptingStates(acceptingStates, state2Idx);
+        this.letter2Idx = res[1];
+        this.delta = formatDeltaGivenNameMatrix(delta, this.state2Idx, this.letter2Idx);
+        this.startingState = formatStartingState(startingState, this.state2Idx);
+        this.acceptingStates = formatAcceptingStates(acceptingStates, this.state2Idx);
+    }
+    evaluatePath (path) {
+        // name change prob.
+        var currentState = this.startingState;
+        console.log("Starting at: " + this.states[currentState].name + " (" + currentState + ")");
+        for (var i = 0; i < path.length; i++) {
+            if (!this.letter2Idx.has(path[i])) {
+                err("Invalid letter in path: \"" + path[i] + "\" .");
+            }
+            console.log("Transitioning with: " + path[i] + " (" + this.letter2Idx.get(path[i]) + ")");
+            currentState = this.delta[currentState][this.letter2Idx.get(path[i])];
+            console.log("Now at: " + this.states[currentState].name + " (" + currentState + ")");
+        }
+        console.log("Finished!");
+        if (this.acceptingStates.has(currentState)) {
+            console.log("End state is in accepting states: word is in the regular language!");
+        } else {
+            console.log("End state is NOT in accepting states: word is NOT in the regular language!");
+        }
+        return currentState;
     }
 }
 
 let states = ["zero", "one", "two"];
-//let alphabet = ["<RESET>", "+0", "+1", "+2", "+1"];
 let alphabet = ["<RESET>", "+0", "+1", "+2"];
 let delta = [
     ["zero", "zero", "one", "two"],
@@ -120,4 +139,9 @@ let delta = [
     ["zero", "two", "zero", "one"],
 ];
 let d = new DFA(states, alphabet, delta, "zero", ["one"]);
+let path = ["+1", "+1", "+0", "+2", "+0", "+0", "+1", "<RESET>", "+1", "+2"];
+let path2 = ["+1", "+1", "+0", "+2", "+0", "+0", "+1", "<RESET>", "+1"];
+console.log(d);
+d.evaluatePath(path);
+d.evaluatePath(path2);
 console.log("youv'e reached the end !");
