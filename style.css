@@ -1,3 +1,14 @@
+#canvasContainer {
+    position : absolute;
+    display : none;
+}
+
+#buttonsDiv {
+    position : absolute;
+    left : 50%;
+    top : 775px;
+}
+
 #canvas {
     border : 2px solid black;
 }
