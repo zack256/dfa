@@ -5,8 +5,10 @@ function err (msg) {
 }
 
 class State {
-    constructor (name) {
+    constructor (name, xCoord, yCoord) {
         this.name = name;
+        this.xCoord = xCoord;   // tbd
+        this.yCoord = yCoord;   // tbd
     }
 }
 
