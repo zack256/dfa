@@ -5,10 +5,15 @@ function err (msg) {
 }
 
 class State {
-    constructor (name, xCoord, yCoord) {
+    constructor (name, drawProperties = null) {
         this.name = name;
-        this.xCoord = xCoord;   // tbd
-        this.yCoord = yCoord;   // tbd
+        /**
+        if (drawProperties == null) {
+            this.drawProperties = {};
+        } else {
+            this.drawProperties = drawProperties;
+        }
+        **/
     }
 }
 

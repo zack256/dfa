@@ -15,17 +15,12 @@ function alignCanvas () {
 const [canvas, ctx] = getCanvasAndContext();
 
 let dfa = null;
+let protoStates = [];
 
 function setupCanvas () {
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
     ctx.font = "20px sans-serif";
-}
-
-function getRandomNumber (low, high) {
-    // [low, high)
-    let delta = high - low;
-    return low + Math.random() * delta;
 }
 
 function getCanvasCoordinates (e) {
@@ -35,11 +30,13 @@ function getCanvasCoordinates (e) {
     return [mouseX, mouseY];
 }
 
-function handleMouseUp (e) {
-    let [xCoord, yCoord] = getCanvasCoordinates(e);
+function makeProtoState (xCoord, yCoord) {
     let msg = "State # " + getRandomNumber(0, 20);
-    let state = new State(msg, xCoord, yCoord);
+    //let drawProperties = {"x" : xCoord, "y" : yCoord, "radius" : goodRadius};
+    let stateProperties = {"name" : msg, "x" : xCoord, "y" : yCoord, "radius" : goodRadius};
+    //let state = new State(msg, drawProperties);
 
+    /**
     // Temporary + bad!
     if (dfa == null) {
         dfa = new DFA([msg], ["a"], [[msg]], msg, []);
@@ -47,7 +44,36 @@ function handleMouseUp (e) {
     } else {
         dfa.states.push(state);
     }
+    **/
 
+    // Optional, maybe:
+    if (newStateWillIntersectExisting(stateProperties)) {
+        console.log("Intersection found. Not adding state...");
+        return;
+    }
+
+    protoStates.push(stateProperties);
+}
+
+function newStateWillIntersectExisting (stateProperties) {
+    let pos1 = [stateProperties.x, stateProperties.y];
+    var pos2;
+    for (const protoState of protoStates) {
+        pos2 = [protoState.x, protoState.y];
+        if (doOrbitsIntersect(pos1, pos2, stateProperties.radius, protoState.radius)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+function clearStates () {
+    protoStates = [];
+}
+
+function handleMouseUp (e) {
+    let [xCoord, yCoord] = getCanvasCoordinates(e);
+    makeProtoState(xCoord, yCoord);
 }
 
 canvas.addEventListener("mouseup", function (e) {

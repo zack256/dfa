@@ -14,22 +14,34 @@ function getRandomStateCoords () {
     let y = getRandomNumber(goodRadius, height - goodRadius);
     return [x, y];
 }
-
+/**
 function drawDFA (dfa) {
     if (dfa == null) return;
-    var state, xCoord, yCoord;
+    var state;
     for (var i = 0; i < dfa.states.length; i++) {
         state = dfa.states[i];
 
-        drawCircle(state.xCoord, state.yCoord, goodRadius);        
-        ctx.fillText(state.name, state.xCoord, state.yCoord);
+        drawCircle(state.drawProperties.x, state.drawProperties.y, state.drawProperties.radius);        
+        ctx.fillText(state.name, state.drawProperties.x, state.drawProperties.y);
+    }
+}
+**/
+
+function drawProtoDFA () {
+    var protoState;
+    for (var i = 0; i < protoStates.length; i++) {
+        protoState = protoStates[i];
+
+        drawCircle(protoState.x, protoState.y, protoState.radius);        
+        ctx.fillText(protoState.name, protoState.x, protoState.y);
     }
 }
 
 function draw () {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    drawDFA(dfa);
+    //drawDFA(dfa);
+    drawProtoDFA();
 
     window.requestAnimationFrame(draw);
 }
