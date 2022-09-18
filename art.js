@@ -1,8 +1,13 @@
 const goodRadius = 50;
 
-function drawCircle (xCoord, yCoord, radius) {
+function drawCircle (xCoord, yCoord, radius, fillColor=null) {
     ctx.beginPath();
     ctx.ellipse(xCoord, yCoord, radius, radius, 0, 0, 2 * Math.PI);
+    if (fillColor != null) {
+        ctx.fillStyle = fillColor;
+        ctx.fill();
+        ctx.fillStyle = "black";
+    }
     ctx.stroke();
 }
 
@@ -14,25 +19,18 @@ function getRandomStateCoords () {
     let y = getRandomNumber(goodRadius, height - goodRadius);
     return [x, y];
 }
-/**
-function drawDFA (dfa) {
-    if (dfa == null) return;
-    var state;
-    for (var i = 0; i < dfa.states.length; i++) {
-        state = dfa.states[i];
-
-        drawCircle(state.drawProperties.x, state.drawProperties.y, state.drawProperties.radius);        
-        ctx.fillText(state.name, state.drawProperties.x, state.drawProperties.y);
-    }
-}
-**/
 
 function drawProtoDFA () {
     var protoState;
     for (var i = 0; i < protoStates.length; i++) {
         protoState = protoStates[i];
 
-        drawCircle(protoState.x, protoState.y, protoState.radius);        
+        if (i == selectedStateIdx) {
+            drawCircle(protoState.x, protoState.y, protoState.radius, "lightblue");    
+        } else {
+            drawCircle(protoState.x, protoState.y, protoState.radius);    
+        }
+    
         ctx.fillText(protoState.name, protoState.x, protoState.y);
     }
 }

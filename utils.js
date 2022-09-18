@@ -13,3 +13,7 @@ function distance (pos1, pos2) {
 function doOrbitsIntersect (pos1, pos2, radius1, radius2) {
     return distance(pos1, pos2) <= (radius1 + radius2);
 }
+
+function pointWithinRadius (planetPos, satellitePos, radius) {
+    return doOrbitsIntersect(planetPos, satellitePos, radius, 0);
+}

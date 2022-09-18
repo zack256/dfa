@@ -13,9 +13,14 @@ function alignCanvas () {
 }
 
 const [canvas, ctx] = getCanvasAndContext();
+const statesDiv = document.getElementById("statesDiv");
+const stateList = document.getElementById("stateList");
+const controlDiv = document.getElementById("controlDiv");
 
 let dfa = null;
 let protoStates = [];
+
+let selectedStateIdx = -1;
 
 function setupCanvas () {
     ctx.textAlign = "center";
@@ -53,6 +58,7 @@ function makeProtoState (xCoord, yCoord) {
     }
 
     protoStates.push(stateProperties);
+    createStateLI(stateProperties.name);
 }
 
 function newStateWillIntersectExisting (stateProperties) {
@@ -68,12 +74,53 @@ function newStateWillIntersectExisting (stateProperties) {
 }
 
 function clearStates () {
+    stateList.replaceChildren();
+    controlDiv.replaceChildren();
     protoStates = [];
+    selectedStateIdx = -1;
+}
+
+function getStateFromPos(pos) {
+    var protoState, pos2;
+    for (var i = 0; i < protoStates.length; i++) {
+        protoState = protoStates[i];
+        pos2 = [protoState.x, protoState.y];
+        if (distance(pos, pos2) <= protoState.radius) {
+            return i;
+        }
+    }
+    return null;
+}
+
+function updateCurrentlySelectedState (idx) {
+    /**
+    let li = document.createElement("LI");
+    li.innerHTML = "Editing " + protoStates[idx].name;
+    statesDiv.appendChild(p);
+    **/
+
+    if (selectedStateIdx == idx) return;
+
+    if (selectedStateIdx != -1) {
+        let oldLI = stateList.children[selectedStateIdx];
+        oldLI.classList.remove("DFA_selectedState");
+        controlDiv.replaceChildren();
+    }
+    selectedStateIdx = idx;
+    let newLI = stateList.children[selectedStateIdx];
+    newLI.classList.add("DFA_selectedState");
+    populateControl(protoStates[selectedStateIdx].name);
 }
 
 function handleMouseUp (e) {
-    let [xCoord, yCoord] = getCanvasCoordinates(e);
-    makeProtoState(xCoord, yCoord);
+
+    let pos = getCanvasCoordinates(e);
+    let idxOfstateClicked = getStateFromPos(pos);
+    if (idxOfstateClicked == null) {
+        makeProtoState(pos[0], pos[1]);
+    } else {
+        updateCurrentlySelectedState(idxOfstateClicked);
+    }
 }
 
 canvas.addEventListener("mouseup", function (e) {
