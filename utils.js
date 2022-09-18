@@ -1,3 +1,9 @@
+function err (msg) {
+    // replacing the throws.
+    console.error(msg);
+    process.exit(1);
+}
+
 function getRandomNumber (low, high) {
     // [low, high)
     let delta = high - low;

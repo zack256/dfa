@@ -19,6 +19,7 @@ const controlDiv = document.getElementById("controlDiv");
 
 let dfa = null;
 let protoStates = [];
+let protoStateNames = new StrictMap();    // for now
 
 let selectedStateIdx = -1;
 
@@ -58,6 +59,7 @@ function makeProtoState (xCoord, yCoord) {
     }
 
     protoStates.push(stateProperties);
+    protoStateNames.set(stateProperties.name, protoStates.length - 1);
     createStateLI(stateProperties.name);
 }
 
@@ -77,6 +79,7 @@ function clearStates () {
     stateList.replaceChildren();
     controlDiv.replaceChildren();
     protoStates = [];
+    protoStateNames.clear();
     selectedStateIdx = -1;
 }
 
@@ -92,12 +95,21 @@ function getStateFromPos(pos) {
     return null;
 }
 
+function controlChangeStateName () {
+    let oldName = protoStates[selectedStateIdx].name;
+    let newName = document.getElementById("controlNameInp").value;
+    if (oldName == newName) return;
+    if (protoStateNames.has(newName)) {
+        alert("A state already has the name \"" + newName + "\"!");
+    } else {
+        protoStateNames.delete(oldName);
+        protoStateNames.set(newName, selectedStateIdx);
+        protoStates[selectedStateIdx].name = newName;
+        stateList.children[selectedStateIdx].innerHTML = newName;
+    }
+}
+
 function updateCurrentlySelectedState (idx) {
-    /**
-    let li = document.createElement("LI");
-    li.innerHTML = "Editing " + protoStates[idx].name;
-    statesDiv.appendChild(p);
-    **/
 
     if (selectedStateIdx == idx) return;
 

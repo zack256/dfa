@@ -1,9 +1,3 @@
-function err (msg) {
-    // replacing the throws.
-    console.error(msg);
-    process.exit(1);
-}
-
 class State {
     constructor (name, drawProperties = null) {
         this.name = name;
