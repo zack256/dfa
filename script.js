@@ -55,12 +55,13 @@ function makeProtoState (xCoord, yCoord) {
     // Optional, maybe:
     if (newStateWillIntersectExisting(stateProperties)) {
         console.log("Intersection found. Not adding state...");
-        return;
+        return false;
     }
 
     protoStates.push(stateProperties);
     protoStateNames.set(stateProperties.name, protoStates.length - 1);
     createStateLI(stateProperties.name);
+    return true;
 }
 
 function newStateWillIntersectExisting (stateProperties) {
@@ -111,7 +112,7 @@ function controlChangeStateName () {
 
 function updateCurrentlySelectedState (idx) {
 
-    if (selectedStateIdx == idx) return;
+    //if (selectedStateIdx == idx) return;
 
     if (selectedStateIdx != -1) {
         let oldLI = stateList.children[selectedStateIdx];
@@ -119,9 +120,26 @@ function updateCurrentlySelectedState (idx) {
         controlDiv.replaceChildren();
     }
     selectedStateIdx = idx;
-    let newLI = stateList.children[selectedStateIdx];
-    newLI.classList.add("DFA_selectedState");
-    populateControl(protoStates[selectedStateIdx].name);
+    if (selectedStateIdx != -1) {
+        let newLI = stateList.children[selectedStateIdx];
+        newLI.classList.add("DFA_selectedState");
+        populateControl(protoStates[selectedStateIdx].name);
+    } else {
+        clearControl();
+    }
+}
+
+function deleteSelectedState () {
+    for (let i = selectedStateIdx + 1; i < protoStates.length; i++) {
+        stateList.children[i].children[1].children[0].onclick = function () {
+            updateCurrentlySelectedState(i - 1);
+        }
+    }
+    let protoState = pop(protoStates, selectedStateIdx);
+    protoStateNames.delete(protoState.name);
+    stateList.children[selectedStateIdx].remove();
+    selectedStateIdx = -1;
+    updateCurrentlySelectedState(-1);
 }
 
 function handleMouseUp (e) {
@@ -129,7 +147,10 @@ function handleMouseUp (e) {
     let pos = getCanvasCoordinates(e);
     let idxOfstateClicked = getStateFromPos(pos);
     if (idxOfstateClicked == null) {
-        makeProtoState(pos[0], pos[1]);
+        let res = makeProtoState(pos[0], pos[1]);
+        if (res) {
+            updateCurrentlySelectedState(protoStates.length - 1);
+        }
     } else {
         updateCurrentlySelectedState(idxOfstateClicked);
     }

@@ -23,3 +23,8 @@ function doOrbitsIntersect (pos1, pos2, radius1, radius2) {
 function pointWithinRadius (planetPos, satellitePos, radius) {
     return doOrbitsIntersect(planetPos, satellitePos, radius, 0);
 }
+
+function pop (arr, idx) {
+    let l = arr.splice(idx, 1);
+    return l[0];
+}
