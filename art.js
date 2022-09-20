@@ -1,4 +1,5 @@
 const goodRadius = 50;
+const goodInnerRadiusFrac = 0.85;
 
 function drawCircle (xCoord, yCoord, radius, fillColor=null) {
     ctx.beginPath();
@@ -29,6 +30,10 @@ function drawProtoDFA () {
             drawCircle(protoState.x, protoState.y, protoState.radius, "lightblue");    
         } else {
             drawCircle(protoState.x, protoState.y, protoState.radius);    
+        }
+
+        if (protoState.isAccepting) {
+            drawCircle(protoState.x, protoState.y, protoState.radius * goodInnerRadiusFrac);
         }
     
         ctx.fillText(protoState.name, protoState.x, protoState.y);

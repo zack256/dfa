@@ -10,6 +10,12 @@ function getRandomNumber (low, high) {
     return low + Math.random() * delta;
 }
 
+function getRandom2DecimalDigitNumber (low, high) {
+    // Not perfect, might not round 0.5 stuff right
+    let num = getRandomNumber(low, high);
+    return Math.round(num * 100) / 100;
+}
+
 function distance (pos1, pos2) {
     let [x1, y1] = pos1;
     let [x2, y2] = pos2;

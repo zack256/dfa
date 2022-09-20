@@ -37,9 +37,14 @@ function getCanvasCoordinates (e) {
 }
 
 function makeProtoState (xCoord, yCoord) {
-    let msg = "State # " + getRandomNumber(0, 20);
-    //let drawProperties = {"x" : xCoord, "y" : yCoord, "radius" : goodRadius};
-    let stateProperties = {"name" : msg, "x" : xCoord, "y" : yCoord, "radius" : goodRadius};
+    let msg = "State # " + getRandom2DecimalDigitNumber(0, 1000);
+    let stateProperties = {
+        "name" : msg,
+        "x" : xCoord,
+        "y" : yCoord,
+        "radius" : goodRadius,
+        "isAccepting" : false
+    };
     //let state = new State(msg, drawProperties);
 
     /**
@@ -106,8 +111,13 @@ function controlChangeStateName () {
         protoStateNames.delete(oldName);
         protoStateNames.set(newName, selectedStateIdx);
         protoStates[selectedStateIdx].name = newName;
-        stateList.children[selectedStateIdx].innerHTML = newName;
+        stateList.children[selectedStateIdx].children[0].innerHTML = newName;
     }
+}
+
+function setSelectedStateAsAccepting (inp) {
+    protoStates[selectedStateIdx].isAccepting = inp.checked;
+    stateList.children[selectedStateIdx].children[2].innerHTML = inp.checked ? "Yes" : "No";
 }
 
 function updateCurrentlySelectedState (idx) {
@@ -123,7 +133,7 @@ function updateCurrentlySelectedState (idx) {
     if (selectedStateIdx != -1) {
         let newLI = stateList.children[selectedStateIdx];
         newLI.classList.add("DFA_selectedState");
-        populateControl(protoStates[selectedStateIdx].name);
+        populateControl(protoStates[selectedStateIdx]);
     } else {
         clearControl();
     }
