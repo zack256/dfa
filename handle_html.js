@@ -1,6 +1,6 @@
 function simpleCreateElement (tagName, text=null) {
     let el = document.createElement(tagName);
-    if (text) {
+    if (text != null) {
         el.innerHTML = text;
     }
     return el;
@@ -8,6 +8,14 @@ function simpleCreateElement (tagName, text=null) {
 
 function makeBreak () {
     return simpleCreateElement("BR");
+}
+
+function appendMultipleChildren (parentElement, childElements) {
+    var childElement;
+    for (var i = 0; i < childElements.length; i++) {
+        childElement = childElements[i];
+        parentElement.appendChild(childElement);
+    }
 }
 
 function createStateLI (name) {
@@ -23,11 +31,17 @@ function createStateLI (name) {
     td2.appendChild(button);
     let td3 = simpleCreateElement("TD", "No");
     let tr = simpleCreateElement("TR");
-    tr.appendChild(td1);
-    tr.appendChild(td2);
-    tr.appendChild(td3);
+    appendMultipleChildren(tr, [td1, td2, td3]);
     stateList.appendChild(tr);
 
+}
+
+function createArrowTR (fromIdx, toIdx) {
+    let td1 = simpleCreateElement("TD", fromIdx);
+    let td2 = simpleCreateElement("TD", toIdx);
+    let tr = simpleCreateElement("TR");
+    appendMultipleChildren(tr, [td1, td2]);
+    arrowList.appendChild(tr);
 }
 
 function populateControl (protoState) {
@@ -49,14 +63,11 @@ function populateControl (protoState) {
     }
 
     let controlDiv = document.getElementById("controlDiv");
-    controlDiv.appendChild(p);
-    controlDiv.appendChild(inp);
-    controlDiv.appendChild(renameButton);
-    controlDiv.appendChild(makeBreak());
-    controlDiv.appendChild(isAcceptingLabel);
-    controlDiv.appendChild(isAcceptingInput);
-    controlDiv.appendChild(makeBreak());
-    controlDiv.appendChild(deleteButton);
+    appendMultipleChildren(controlDiv, 
+        [p, inp, renameButton, makeBreak(),
+        isAcceptingLabel, isAcceptingInput,
+        makeBreak(), deleteButton]
+    );
 
 }
 

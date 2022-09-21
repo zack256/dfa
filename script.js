@@ -15,13 +15,16 @@ function alignCanvas () {
 const [canvas, ctx] = getCanvasAndContext();
 const statesDiv = document.getElementById("statesDiv");
 const stateList = document.getElementById("stateList");
+const arrowList = document.getElementById("arrowList");
 const controlDiv = document.getElementById("controlDiv");
 
 let dfa = null;
 let protoStates = [];
 let protoStateNames = new StrictMap();    // for now
+let protoArrows = [];
 
 let selectedStateIdx = -1;
+let arrowOrigin = -1;
 
 function setupCanvas () {
     ctx.textAlign = "center";
@@ -145,6 +148,18 @@ function deleteSelectedState () {
             updateCurrentlySelectedState(i - 1);
         }
     }
+    let z = 0;
+    console.log(selectedStateIdx);
+    console.log(protoArrows);
+    while (z < protoArrows.length) {
+        if (protoArrows[z][0] == selectedStateIdx || protoArrows[z][1] == selectedStateIdx) {
+            pop(protoArrows, z);
+            continue;
+        }
+        if (protoArrows[z][0] > selectedStateIdx) protoArrows[z][0]--;
+        if (protoArrows[z][1] > selectedStateIdx) protoArrows[z][1]--;
+        z++;
+    }
     let protoState = pop(protoStates, selectedStateIdx);
     protoStateNames.delete(protoState.name);
     stateList.children[selectedStateIdx].remove();
@@ -153,21 +168,45 @@ function deleteSelectedState () {
 }
 
 function handleMouseUp (e) {
-
     let pos = getCanvasCoordinates(e);
     let idxOfstateClicked = getStateFromPos(pos);
+
     if (idxOfstateClicked == null) {
-        let res = makeProtoState(pos[0], pos[1]);
-        if (res) {
-            updateCurrentlySelectedState(protoStates.length - 1);
+        if (arrowOrigin != -1) {
+            arrowOrigin = -1;
+        } else {
+            let res = makeProtoState(pos[0], pos[1]);
+            if (res) {
+                updateCurrentlySelectedState(protoStates.length - 1);
+            }
         }
     } else {
-        updateCurrentlySelectedState(idxOfstateClicked);
+        console.log(arrowOrigin + " !!!");
+        if (arrowOrigin == idxOfstateClicked) arrowOrigin = -1;
+        if (arrowOrigin == -1) {
+            updateCurrentlySelectedState(idxOfstateClicked);
+        } else {
+            console.log("we have made an arrow from " + arrowOrigin + " to " + idxOfstateClicked + "!!");
+            protoArrows.push([arrowOrigin, idxOfstateClicked]);
+            createArrowTR(arrowOrigin, idxOfstateClicked);
+            arrowOrigin = -1;
+        }
+    }
+}
+
+function handleMouseDown (e) {
+    let pos = getCanvasCoordinates(e);
+    let idxOfstateClicked = getStateFromPos(pos);
+    if (idxOfstateClicked != null) {
+        arrowOrigin = idxOfstateClicked;
     }
 }
 
 canvas.addEventListener("mouseup", function (e) {
     handleMouseUp(e);
+});
+canvas.addEventListener("mousedown", function (e) {
+    handleMouseDown(e);
 });
 
 window.addEventListener("load", function (e) {

@@ -12,6 +12,13 @@ function drawCircle (xCoord, yCoord, radius, fillColor=null) {
     ctx.stroke();
 }
 
+function drawLine (x1, y1, x2, y2) {
+    ctx.beginPath();
+    ctx.moveTo(x1, y1);
+    ctx.lineTo(x2, y2);
+    ctx.stroke();
+}
+
 function getRandomStateCoords () {
     // Prevents bleeding off edge of canvas.
     let width = canvas.width;
@@ -21,7 +28,7 @@ function getRandomStateCoords () {
     return [x, y];
 }
 
-function drawProtoDFA () {
+function drawProtoStates () {
     var protoState;
     for (var i = 0; i < protoStates.length; i++) {
         protoState = protoStates[i];
@@ -29,7 +36,7 @@ function drawProtoDFA () {
         if (i == selectedStateIdx) {
             drawCircle(protoState.x, protoState.y, protoState.radius, "lightblue");    
         } else {
-            drawCircle(protoState.x, protoState.y, protoState.radius);    
+            drawCircle(protoState.x, protoState.y, protoState.radius, "white");    
         }
 
         if (protoState.isAccepting) {
@@ -40,10 +47,29 @@ function drawProtoDFA () {
     }
 }
 
+function drawProtoArrows () {
+    var arrowIdxs, protoState1, protoState2;
+    for (var i = 0; i < protoArrows.length; i++) {
+        arrowIdxs = protoArrows[i];
+        protoState1 = protoStates[arrowIdxs[0]];
+        protoState2 = protoStates[arrowIdxs[1]];
+        drawLine(protoState1.x, protoState1.y, protoState2.x, protoState2.y);
+    }
+}
+
+function drawCurrentArrow () {
+    if (arrowOrigin == -1) return;
+    //drawLine()
+}
+
+function drawProtoDFA () {
+    drawProtoArrows();
+    drawProtoStates();
+}
+
 function draw () {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    //drawDFA(dfa);
     drawProtoDFA();
 
     window.requestAnimationFrame(draw);
