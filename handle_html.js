@@ -39,8 +39,9 @@ function createStateLI (name) {
 function createArrowTR (fromIdx, toIdx) {
     let td1 = simpleCreateElement("TD", fromIdx);
     let td2 = simpleCreateElement("TD", toIdx);
+    let td3 = simpleCreateElement("TD");
     let tr = simpleCreateElement("TR");
-    appendMultipleChildren(tr, [td1, td2]);
+    appendMultipleChildren(tr, [td1, td2, td3]);
     arrowList.appendChild(tr);
 }
 

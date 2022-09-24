@@ -34,16 +34,16 @@ function drawProtoStates () {
         protoState = protoStates[i];
 
         if (i == selectedStateIdx) {
-            drawCircle(protoState.x, protoState.y, protoState.radius, "lightblue");    
+            drawCircle(protoState.pos.x, protoState.pos.y, protoState.radius, "lightblue");
         } else {
-            drawCircle(protoState.x, protoState.y, protoState.radius, "white");    
+            drawCircle(protoState.pos.x, protoState.pos.y, protoState.radius, "white");
         }
 
         if (protoState.isAccepting) {
-            drawCircle(protoState.x, protoState.y, protoState.radius * goodInnerRadiusFrac);
+            drawCircle(protoState.pos.x, protoState.pos.y, protoState.radius * goodInnerRadiusFrac);
         }
     
-        ctx.fillText(protoState.name, protoState.x, protoState.y);
+        ctx.fillText(protoState.name, protoState.pos.x, protoState.pos.y);
     }
 }
 
@@ -53,18 +53,20 @@ function drawProtoArrows () {
         arrowIdxs = protoArrows[i];
         protoState1 = protoStates[arrowIdxs[0]];
         protoState2 = protoStates[arrowIdxs[1]];
-        drawLine(protoState1.x, protoState1.y, protoState2.x, protoState2.y);
+        drawLine(protoState1.pos.x, protoState1.pos.y, protoState2.pos.x, protoState2.pos.y);
     }
 }
 
 function drawCurrentArrow () {
     if (arrowOrigin == -1) return;
-    //drawLine()
+    let protoState = protoStates[arrowOrigin];
+    drawLine(protoState.pos.x, protoState.pos.y, mousePos[0], mousePos[1]);
 }
 
 function drawProtoDFA () {
     drawProtoArrows();
     drawProtoStates();
+    drawCurrentArrow();
 }
 
 function draw () {

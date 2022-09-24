@@ -26,6 +26,8 @@ let protoArrows = [];
 let selectedStateIdx = -1;
 let arrowOrigin = -1;
 
+let mousePos = new Pos(null, null);
+
 function setupCanvas () {
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
@@ -36,19 +38,12 @@ function getCanvasCoordinates (e) {
     let rect = canvas.getBoundingClientRect();
     let mouseX = e.clientX - rect.left;
     let mouseY = e.clientY - rect.top;
-    return [mouseX, mouseY];
+    return new Pos(mouseX, mouseY);
 }
 
-function makeProtoState (xCoord, yCoord) {
+function makeProtoState (pos) {
     let msg = "State # " + getRandom2DecimalDigitNumber(0, 1000);
-    let stateProperties = {
-        "name" : msg,
-        "x" : xCoord,
-        "y" : yCoord,
-        "radius" : goodRadius,
-        "isAccepting" : false
-    };
-    //let state = new State(msg, drawProperties);
+    let protoState = new ProtoState(msg, pos, goodRadius, false);
 
     /**
     // Temporary + bad!
@@ -61,23 +56,20 @@ function makeProtoState (xCoord, yCoord) {
     **/
 
     // Optional, maybe:
-    if (newStateWillIntersectExisting(stateProperties)) {
+    if (newStateWillIntersectExisting(protoState)) {
         console.log("Intersection found. Not adding state...");
         return false;
     }
 
-    protoStates.push(stateProperties);
-    protoStateNames.set(stateProperties.name, protoStates.length - 1);
-    createStateLI(stateProperties.name);
+    protoStates.push(protoState);
+    protoStateNames.set(protoState.name, protoStates.length - 1);
+    createStateLI(protoState.name);
     return true;
 }
 
-function newStateWillIntersectExisting (stateProperties) {
-    let pos1 = [stateProperties.x, stateProperties.y];
-    var pos2;
+function newStateWillIntersectExisting (newProtoState) {
     for (const protoState of protoStates) {
-        pos2 = [protoState.x, protoState.y];
-        if (doOrbitsIntersect(pos1, pos2, stateProperties.radius, protoState.radius)) {
+        if (doOrbitsIntersect(newProtoState.pos, protoState.pos, newProtoState.radius, protoState.radius)) {
             return true;
         }
     }
@@ -93,11 +85,10 @@ function clearStates () {
 }
 
 function getStateFromPos(pos) {
-    var protoState, pos2;
+    var protoState;
     for (var i = 0; i < protoStates.length; i++) {
         protoState = protoStates[i];
-        pos2 = [protoState.x, protoState.y];
-        if (distance(pos, pos2) <= protoState.radius) {
+        if (distance(pos, protoState.pos) <= protoState.radius) {
             return i;
         }
     }
@@ -108,8 +99,13 @@ function controlChangeStateName () {
     let oldName = protoStates[selectedStateIdx].name;
     let newName = document.getElementById("controlNameInp").value;
     if (oldName == newName) return;
+    if (newName == "") {
+        alert("Name can't be blank!");
+        return;
+    }
     if (protoStateNames.has(newName)) {
         alert("A state already has the name \"" + newName + "\"!");
+        return;
     } else {
         protoStateNames.delete(oldName);
         protoStateNames.set(newName, selectedStateIdx);
@@ -167,6 +163,15 @@ function deleteSelectedState () {
     updateCurrentlySelectedState(-1);
 }
 
+function makeArrow (fromIdx, toIdx) {
+    if (protoStates[fromIdx].outgoing.has(toIdx)) return;
+    protoStates[fromIdx].outgoing.set(toIdx, null); //tbd
+    protoStates[toIdx].incoming.set(fromIdx, null);
+    protoArrows.push([fromIdx, toIdx]);
+    createArrowTR(fromIdx, toIdx);
+    arrowOrigin = -1;
+}
+
 function handleMouseUp (e) {
     let pos = getCanvasCoordinates(e);
     let idxOfstateClicked = getStateFromPos(pos);
@@ -175,7 +180,7 @@ function handleMouseUp (e) {
         if (arrowOrigin != -1) {
             arrowOrigin = -1;
         } else {
-            let res = makeProtoState(pos[0], pos[1]);
+            let res = makeProtoState(pos);
             if (res) {
                 updateCurrentlySelectedState(protoStates.length - 1);
             }
@@ -187,9 +192,7 @@ function handleMouseUp (e) {
             updateCurrentlySelectedState(idxOfstateClicked);
         } else {
             console.log("we have made an arrow from " + arrowOrigin + " to " + idxOfstateClicked + "!!");
-            protoArrows.push([arrowOrigin, idxOfstateClicked]);
-            createArrowTR(arrowOrigin, idxOfstateClicked);
-            arrowOrigin = -1;
+            makeArrow(arrowOrigin, idxOfstateClicked);
         }
     }
 }
@@ -202,11 +205,18 @@ function handleMouseDown (e) {
     }
 }
 
+function handleMouseMove (e) {
+    mousePos = getCanvasCoordinates(e);
+}
+
 canvas.addEventListener("mouseup", function (e) {
     handleMouseUp(e);
 });
 canvas.addEventListener("mousedown", function (e) {
     handleMouseDown(e);
+});
+canvas.addEventListener("mousemove", function (e) {
+    handleMouseMove(e);
 });
 
 window.addEventListener("load", function (e) {

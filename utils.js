@@ -17,9 +17,7 @@ function getRandom2DecimalDigitNumber (low, high) {
 }
 
 function distance (pos1, pos2) {
-    let [x1, y1] = pos1;
-    let [x2, y2] = pos2;
-    return Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
+    return Math.sqrt((pos2.x - pos1.x) ** 2 + (pos2.y - pos1.y) ** 2);
 }
 
 function doOrbitsIntersect (pos1, pos2, radius1, radius2) {
