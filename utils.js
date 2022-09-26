@@ -28,6 +28,14 @@ function pointWithinRadius (planetPos, satellitePos, radius) {
     return doOrbitsIntersect(planetPos, satellitePos, radius, 0);
 }
 
+function slope (pos1, pos2) {
+    return (pos2.y - pos1.y) / (pos2.x - pos1.x);
+}
+
+function degreesToRadians (theta) {
+    return (theta / 180) * Math.PI;
+}
+
 function pop (arr, idx) {
     let l = arr.splice(idx, 1);
     return l[0];

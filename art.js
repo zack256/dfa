@@ -1,6 +1,13 @@
 const goodRadius = 50;
 const goodInnerRadiusFrac = 0.85;
 
+const arrowTipHeight = 10;
+const arrowThetaDegrees = 45;
+const arrowTheta = degreesToRadians(arrowThetaDegrees);
+const halfArrowTheta = arrowTheta / 2;
+const showArrowTipMultiplier = 2;   // 0 if always show.
+const showArrowDist = arrowTipHeight * showArrowTipMultiplier;
+
 function drawCircle (xCoord, yCoord, radius, fillColor=null) {
     ctx.beginPath();
     ctx.ellipse(xCoord, yCoord, radius, radius, 0, 0, 2 * Math.PI);
@@ -12,11 +19,36 @@ function drawCircle (xCoord, yCoord, radius, fillColor=null) {
     ctx.stroke();
 }
 
-function drawLine (x1, y1, x2, y2) {
+function drawLine (pos1, pos2) {
     ctx.beginPath();
-    ctx.moveTo(x1, y1);
-    ctx.lineTo(x2, y2);
+    ctx.moveTo(pos1.x, pos1.y);
+    ctx.lineTo(pos2.x, pos2.y);
     ctx.stroke();
+}
+
+function drawArrow (startPos, endPos) {
+    drawLine(startPos, endPos);
+    let arrowLength = distance(startPos, endPos);
+    if (arrowLength > showArrowDist) {
+        let deltaX = endPos.x - startPos.x;
+        let deltaY = endPos.y - startPos.y;
+        let tipFraction = arrowTipHeight / arrowLength;
+        let arrowBase = new Pos(endPos.x - tipFraction * deltaX, endPos.y - tipFraction * deltaY);
+        if (deltaY != 0) {  // deltaX == 0 is fine.
+            let arrowSlope = slope(startPos, endPos);
+            let perpSlope = -1 * (1 / arrowSlope);
+            baseVector = new Vector(1, perpSlope);
+        } else {
+            baseVector = new Vector(0, 1);
+        }
+        let halfBaseLength = arrowTipHeight * Math.tan(halfArrowTheta);
+        let halfBaseVector = baseVector.parallelOfMagnitude(halfBaseLength);
+        ctx.beginPath();
+        ctx.moveTo(endPos.x, endPos.y);
+        ctx.lineTo(arrowBase.x + halfBaseVector.x, arrowBase.y + halfBaseVector.y);
+        ctx.lineTo(arrowBase.x - halfBaseVector.x, arrowBase.y - halfBaseVector.y);
+        ctx.fill();
+    }
 }
 
 function getRandomStateCoords () {
@@ -48,19 +80,23 @@ function drawProtoStates () {
 }
 
 function drawProtoArrows () {
-    var arrowIdxs, protoState1, protoState2;
+    var arrowIdxs, protoState1, protoState2, vec;
     for (var i = 0; i < protoArrows.length; i++) {
         arrowIdxs = protoArrows[i];
         protoState1 = protoStates[arrowIdxs[0]];
         protoState2 = protoStates[arrowIdxs[1]];
-        drawLine(protoState1.pos.x, protoState1.pos.y, protoState2.pos.x, protoState2.pos.y);
+        vec = new Vector(protoState2.pos.x - protoState1.pos.x, protoState2.pos.y - protoState1.pos.y);
+        vec = vec.parallelOfMagnitude(distance(protoState1.pos, protoState2.pos) - protoState2.radius);
+        //drawLine(protoState1.pos, protoState2.pos);
+        drawArrow(protoState1.pos, new Pos(protoState1.pos.x + vec.x, protoState1.pos.y + vec.y));
     }
 }
 
 function drawCurrentArrow () {
     if (arrowOrigin == -1) return;
     let protoState = protoStates[arrowOrigin];
-    drawLine(protoState.pos.x, protoState.pos.y, mousePos[0], mousePos[1]);
+    //drawLine(protoState.pos, mousePos);
+    drawArrow(protoState.pos, mousePos);
 }
 
 function drawProtoDFA () {

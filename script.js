@@ -79,8 +79,10 @@ function newStateWillIntersectExisting (newProtoState) {
 function clearStates () {
     stateList.replaceChildren();
     controlDiv.replaceChildren();
+    arrowList.replaceChildren();
     protoStates = [];
     protoStateNames.clear();
+    protoArrows = [];
     selectedStateIdx = -1;
 }
 
@@ -164,11 +166,12 @@ function deleteSelectedState () {
 }
 
 function makeArrow (fromIdx, toIdx) {
-    if (protoStates[fromIdx].outgoing.has(toIdx)) return;
-    protoStates[fromIdx].outgoing.set(toIdx, null); //tbd
-    protoStates[toIdx].incoming.set(fromIdx, null);
-    protoArrows.push([fromIdx, toIdx]);
-    createArrowTR(fromIdx, toIdx);
+    if (!protoStates[fromIdx].outgoing.has(toIdx)) {
+        protoStates[fromIdx].outgoing.set(toIdx, null); //tbd
+        protoStates[toIdx].incoming.set(fromIdx, null);
+        protoArrows.push([fromIdx, toIdx]);
+        createArrowTR(fromIdx, toIdx);
+    }
     arrowOrigin = -1;
 }
 
@@ -186,12 +189,10 @@ function handleMouseUp (e) {
             }
         }
     } else {
-        console.log(arrowOrigin + " !!!");
-        if (arrowOrigin == idxOfstateClicked) arrowOrigin = -1;
+        if (arrowOrigin == idxOfstateClicked) arrowOrigin = -1; // keep :)
         if (arrowOrigin == -1) {
             updateCurrentlySelectedState(idxOfstateClicked);
         } else {
-            console.log("we have made an arrow from " + arrowOrigin + " to " + idxOfstateClicked + "!!");
             makeArrow(arrowOrigin, idxOfstateClicked);
         }
     }
