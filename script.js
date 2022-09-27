@@ -19,14 +19,20 @@ const arrowList = document.getElementById("arrowList");
 const controlDiv = document.getElementById("controlDiv");
 
 let dfa = null;
-let protoStates = [];
+let protoStateList = [];
 let protoStateNames = new StrictMap();    // for now
+let protoStateMap = new StrictMap();
 let protoArrows = [];
+let nextProtoStateID = 1;
 
-let selectedStateIdx = -1;
+let selectedStateID = -1;
 let arrowOrigin = -1;
 
 let mousePos = new Pos(null, null);
+
+function GSS () {
+    return protoStateMap.get(selectedStateID);
+}
 
 function setupCanvas () {
     ctx.textAlign = "center";
@@ -42,8 +48,9 @@ function getCanvasCoordinates (e) {
 }
 
 function makeProtoState (pos) {
-    let msg = "State # " + getRandom2DecimalDigitNumber(0, 1000);
-    let protoState = new ProtoState(msg, pos, goodRadius, false);
+    //let msg = "State # " + getRandom2DecimalDigitNumber(0, 1000);
+    let msg = "State # " + nextProtoStateID;
+    let protoState = new ProtoState(nextProtoStateID, protoStateList.length, msg, pos, goodRadius, false);
 
     /**
     // Temporary + bad!
@@ -61,15 +68,18 @@ function makeProtoState (pos) {
         return false;
     }
 
-    protoStates.push(protoState);
-    protoStateNames.set(protoState.name, protoStates.length - 1);
+    //protoStateList.push(protoState);
+    protoStateList.push(protoState.id);
+    protoStateNames.set(protoState.name, protoState.id);
+    protoStateMap.set(nextProtoStateID, protoState);
     createStateLI(protoState.name);
+    nextProtoStateID++;
     return true;
 }
 
 function newStateWillIntersectExisting (newProtoState) {
-    for (const protoState of protoStates) {
-        if (doOrbitsIntersect(newProtoState.pos, protoState.pos, newProtoState.radius, protoState.radius)) {
+    for (const protoStateID of protoStateList) {
+        if (doOrbitsIntersect(newProtoState.pos, protoStateMap.get(protoStateID).pos, newProtoState.radius, protoStateMap.get(protoStateID).radius)) {
             return true;
         }
     }
@@ -80,25 +90,28 @@ function clearStates () {
     stateList.replaceChildren();
     controlDiv.replaceChildren();
     arrowList.replaceChildren();
-    protoStates = [];
+    protoStateList = [];
     protoStateNames.clear();
+    protoStateMap.clear();
     protoArrows = [];
-    selectedStateIdx = -1;
+    selectedStateID = -1;
+    nextProtoStateID = 1;   // Can rm if wanted.
 }
 
 function getStateFromPos(pos) {
     var protoState;
-    for (var i = 0; i < protoStates.length; i++) {
-        protoState = protoStates[i];
+    for (var i = 0; i < protoStateList.length; i++) {
+        protoState = protoStateMap.get(protoStateList[i]);
         if (distance(pos, protoState.pos) <= protoState.radius) {
-            return i;
+            return protoState.id;
         }
     }
     return null;
 }
 
 function controlChangeStateName () {
-    let oldName = protoStates[selectedStateIdx].name;
+    //let oldName = protoStateList[selectedStateIdx].name;
+    let oldName = protoStateMap.get(selectedStateID).name;
     let newName = document.getElementById("controlNameInp").value;
     if (oldName == newName) return;
     if (newName == "") {
@@ -110,99 +123,106 @@ function controlChangeStateName () {
         return;
     } else {
         protoStateNames.delete(oldName);
-        protoStateNames.set(newName, selectedStateIdx);
-        protoStates[selectedStateIdx].name = newName;
-        stateList.children[selectedStateIdx].children[0].innerHTML = newName;
+        protoStateNames.set(newName, selectedStateID);
+        protoStateMap.get(selectedStateID).name = newName;
+        stateList.children[GSS().idx].children[0].innerHTML = newName;
     }
 }
 
 function setSelectedStateAsAccepting (inp) {
-    protoStates[selectedStateIdx].isAccepting = inp.checked;
-    stateList.children[selectedStateIdx].children[2].innerHTML = inp.checked ? "Yes" : "No";
+    //protoStateList[selectedStateIdx].isAccepting = inp.checked;
+    GSS().isAccepting = inp.checked;
+    stateList.children[GSS().idx].children[2].innerHTML = inp.checked ? "Yes" : "No";
 }
 
-function updateCurrentlySelectedState (idx) {
+function updateCurrentlySelectedState (newID) {
 
     //if (selectedStateIdx == idx) return;
 
-    if (selectedStateIdx != -1) {
-        let oldLI = stateList.children[selectedStateIdx];
+    if (selectedStateID != -1) {
+        let oldLI = stateList.children[GSS().idx];
         oldLI.classList.remove("DFA_selectedState");
         controlDiv.replaceChildren();
     }
-    selectedStateIdx = idx;
-    if (selectedStateIdx != -1) {
-        let newLI = stateList.children[selectedStateIdx];
+    selectedStateID = newID;
+    if (selectedStateID != -1) {
+        let newLI = stateList.children[GSS().idx];
         newLI.classList.add("DFA_selectedState");
-        populateControl(protoStates[selectedStateIdx]);
+        populateControl(GSS());
     } else {
         clearControl();
     }
 }
 
 function deleteSelectedState () {
-    for (let i = selectedStateIdx + 1; i < protoStates.length; i++) {
+    /**
+    for (let i = GSS().idx + 1; i < protoStateList.length; i++) {
         stateList.children[i].children[1].children[0].onclick = function () {
-            updateCurrentlySelectedState(i - 1);
+            updateCurrentlySelectedState(protoStateList[i - 1]);
         }
     }
+    **/
+   for (let i = GSS().idx + 1; i < protoStateList.length; i++) {
+       protoStateMap.get(protoStateList[i]).idx--;
+    }
     let z = 0;
-    console.log(selectedStateIdx);
-    console.log(protoArrows);
     while (z < protoArrows.length) {
-        if (protoArrows[z][0] == selectedStateIdx || protoArrows[z][1] == selectedStateIdx) {
+        if (protoArrows[z][0] == selectedStateID || protoArrows[z][1] == selectedStateID) {
             pop(protoArrows, z);
             continue;
         }
-        if (protoArrows[z][0] > selectedStateIdx) protoArrows[z][0]--;
-        if (protoArrows[z][1] > selectedStateIdx) protoArrows[z][1]--;
+        //if (protoArrows[z][0] > selectedStateIdx) protoArrows[z][0]--;
+        //if (protoArrows[z][1] > selectedStateIdx) protoArrows[z][1]--;
         z++;
     }
-    let protoState = pop(protoStates, selectedStateIdx);
+    //let protoState = pop(protoStateList, selectedStateIdx);
+    let protoState = GSS();
+    pop(protoStateList, protoState.idx);
     protoStateNames.delete(protoState.name);
-    stateList.children[selectedStateIdx].remove();
-    selectedStateIdx = -1;
+    stateList.children[protoState.idx].remove();
+    protoStateMap.delete(selectedStateID);
+    selectedStateID = -1;
     updateCurrentlySelectedState(-1);
 }
 
-function makeArrow (fromIdx, toIdx) {
-    if (!protoStates[fromIdx].outgoing.has(toIdx)) {
-        protoStates[fromIdx].outgoing.set(toIdx, null); //tbd
-        protoStates[toIdx].incoming.set(fromIdx, null);
-        protoArrows.push([fromIdx, toIdx]);
-        createArrowTR(fromIdx, toIdx);
+function makeArrow (fromID, toID) {
+    if (!protoStateMap.get(fromID).outgoing.has(toID)) {
+        protoStateMap.get(fromID).outgoing.set(toID, null); //tbd
+        protoStateMap.get(toID).incoming.set(fromID, null);
+        protoArrows.push([fromID, toID]);
+        createArrowTR(fromID, toID);
     }
-    arrowOrigin = -1;
 }
 
 function handleMouseUp (e) {
     let pos = getCanvasCoordinates(e);
-    let idxOfstateClicked = getStateFromPos(pos);
+    let IDOfstateClicked = getStateFromPos(pos);
 
-    if (idxOfstateClicked == null) {
+    if (IDOfstateClicked == null) {
         if (arrowOrigin != -1) {
             arrowOrigin = -1;
         } else {
             let res = makeProtoState(pos);
             if (res) {
-                updateCurrentlySelectedState(protoStates.length - 1);
+                updateCurrentlySelectedState(nextProtoStateID - 1);
             }
         }
     } else {
-        if (arrowOrigin == idxOfstateClicked) arrowOrigin = -1; // keep :)
+        if (arrowOrigin == IDOfstateClicked) arrowOrigin = -1; // keep :)
         if (arrowOrigin == -1) {
-            updateCurrentlySelectedState(idxOfstateClicked);
+            updateCurrentlySelectedState(IDOfstateClicked);
         } else {
-            makeArrow(arrowOrigin, idxOfstateClicked);
+            makeArrow(arrowOrigin, IDOfstateClicked);
+            arrowOrigin = -1;
         }
     }
 }
 
 function handleMouseDown (e) {
     let pos = getCanvasCoordinates(e);
-    let idxOfstateClicked = getStateFromPos(pos);
-    if (idxOfstateClicked != null) {
-        arrowOrigin = idxOfstateClicked;
+    let IDOfstateClicked = getStateFromPos(pos);
+    if (IDOfstateClicked != null) {
+        arrowOrigin = IDOfstateClicked;
     }
 }
 

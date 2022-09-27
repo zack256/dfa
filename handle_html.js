@@ -23,9 +23,9 @@ function createStateLI (name) {
     let td1 = simpleCreateElement("TD", name);
     let button = simpleCreateElement("BUTTON", "Edit");
     //let x = stateList.children.length - 1;
-    let idx = protoStates.length - 1;
+    let id = protoStateList[protoStateList.length - 1];
     button.onclick = function () {
-        updateCurrentlySelectedState(idx);
+        updateCurrentlySelectedState(id);
     }
     let td2 = simpleCreateElement("TD");
     td2.appendChild(button);
@@ -36,9 +36,9 @@ function createStateLI (name) {
 
 }
 
-function createArrowTR (fromIdx, toIdx) {
-    let td1 = simpleCreateElement("TD", fromIdx);
-    let td2 = simpleCreateElement("TD", toIdx);
+function createArrowTR (fromID, toID) {
+    let td1 = simpleCreateElement("TD", fromID);
+    let td2 = simpleCreateElement("TD", toID);
     let td3 = simpleCreateElement("TD");
     let tr = simpleCreateElement("TR");
     appendMultipleChildren(tr, [td1, td2, td3]);
@@ -73,7 +73,6 @@ function populateControl (protoState) {
 }
 
 function clearControl () {
-    console.log("hola");
     while (controlDiv.children.length) {
         controlDiv.children[0].remove();
     }

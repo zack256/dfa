@@ -1,5 +1,7 @@
 class ProtoState {
-    constructor (name, pos, radius, isAccepting) {
+    constructor (id, idx, name, pos, radius, isAccepting) {
+        this.id = id;
+        this.idx = idx;
         this.name = name;
         this.pos = pos;
         this.radius = radius;

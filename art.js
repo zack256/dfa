@@ -61,11 +61,12 @@ function getRandomStateCoords () {
 }
 
 function drawProtoStates () {
-    var protoState;
-    for (var i = 0; i < protoStates.length; i++) {
-        protoState = protoStates[i];
+    var id, protoState;
+    for (var i = 0; i < protoStateList.length; i++) {
+        id = protoStateList[i];
+        protoState = protoStateMap.get(id);
 
-        if (i == selectedStateIdx) {
+        if (id == selectedStateID) {
             drawCircle(protoState.pos.x, protoState.pos.y, protoState.radius, "lightblue");
         } else {
             drawCircle(protoState.pos.x, protoState.pos.y, protoState.radius, "white");
@@ -80,11 +81,11 @@ function drawProtoStates () {
 }
 
 function drawProtoArrows () {
-    var arrowIdxs, protoState1, protoState2, vec;
+    var arrowIDs, protoState1, protoState2, vec;
     for (var i = 0; i < protoArrows.length; i++) {
-        arrowIdxs = protoArrows[i];
-        protoState1 = protoStates[arrowIdxs[0]];
-        protoState2 = protoStates[arrowIdxs[1]];
+        arrowIDs = protoArrows[i];
+        protoState1 = protoStateMap.get(arrowIDs[0]);
+        protoState2 = protoStateMap.get(arrowIDs[1]);
         vec = new Vector(protoState2.pos.x - protoState1.pos.x, protoState2.pos.y - protoState1.pos.y);
         vec = vec.parallelOfMagnitude(distance(protoState1.pos, protoState2.pos) - protoState2.radius);
         //drawLine(protoState1.pos, protoState2.pos);
@@ -94,7 +95,7 @@ function drawProtoArrows () {
 
 function drawCurrentArrow () {
     if (arrowOrigin == -1) return;
-    let protoState = protoStates[arrowOrigin];
+    let protoState = protoStateMap.get(arrowOrigin);
     //drawLine(protoState.pos, mousePos);
     drawArrow(protoState.pos, mousePos);
 }
