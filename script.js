@@ -13,7 +13,7 @@ function alignCanvas () {
 }
 
 const [canvas, ctx] = getCanvasAndContext();
-const statesDiv = document.getElementById("statesDiv");
+const statesDiv = document.getElementById("statesPanel");
 const stateList = document.getElementById("stateList");
 const arrowList = document.getElementById("arrowList");
 const controlDiv = document.getElementById("controlDiv");
@@ -25,8 +25,8 @@ let protoStateMap = new StrictMap();
 let protoArrows = [];
 let nextProtoStateID = 1;
 
-let selectedStateID = -1;
-let arrowOrigin = -1;
+let protoLetterMap, protoLetterNames, protoLetterList, nextProtoLetterID;
+let selectedStateID, arrowOrigin;
 
 let mousePos = new Pos(null, null);
 
@@ -94,6 +94,8 @@ function clearStates () {
     protoStateNames.clear();
     protoStateMap.clear();
     protoArrows = [];
+    protoLetterMap.clear();
+    protoLetterList = [];
     selectedStateID = -1;
     nextProtoStateID = 1;   // Can rm if wanted.
 }
@@ -169,6 +171,7 @@ function deleteSelectedState () {
     while (z < protoArrows.length) {
         if (protoArrows[z][0] == selectedStateID || protoArrows[z][1] == selectedStateID) {
             pop(protoArrows, z);
+            arrowList.children[z].remove();
             continue;
         }
         //if (protoArrows[z][0] > selectedStateIdx) protoArrows[z][0]--;
@@ -192,6 +195,16 @@ function makeArrow (fromID, toID) {
         protoArrows.push([fromID, toID]);
         createArrowTR(fromID, toID);
     }
+}
+
+function addLetter (letterName) {
+    if (protoLetterNames.has(letterName)) err ("duplicate letter add");
+    let letter = new ProtoLetter(nextProtoLetterID, protoLetterList.length, letterName);
+    nextProtoLetterID++;
+    protoLetterList.push(letter.id);
+    protoLetterNames.set(letterName, letter.id);
+    protoLetterMap.set(letter.id, letter);
+    addLetterTR(letter);
 }
 
 function handleMouseUp (e) {
@@ -226,6 +239,20 @@ function handleMouseDown (e) {
     }
 }
 
+function goodReset () {
+    protoLetterList = [];   // aka protoAlphabet?
+    protoLetterNames = new StrictMap();
+    protoLetterMap = new StrictMap();
+    nextProtoLetterID = 1;
+    selectedStateID = -1;
+    arrowOrigin = -1;
+}
+
+function initProtoStage () {
+    goodReset();
+    addLetter("a"); // demo
+}
+
 function handleMouseMove (e) {
     mousePos = getCanvasCoordinates(e);
 }
@@ -250,3 +277,5 @@ window.addEventListener("load", function (e) {
     window.requestAnimationFrame(draw);
 
 });
+
+initProtoStage();

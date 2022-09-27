@@ -15,38 +15,61 @@
             <button onclick = "clearStates();">Clear</button>
             <button onclick = "console.log('helo');">Check</button>
         </div>
-        <div id="statesDiv">
-            <p>States</p>
-            <!--<ul id="stateList"></ul>-->
-            <table>
-                <thead>
-                    <tr>
-                        <th>State</th>
-                        <th>Edit</th>
-                        <th>Accepting?</th>
-                    </tr>
-                </thead>
-                <tbody id="stateList"></tbody>
-            </table>
+        <div id="leftDiv">
+            <div id="panelButtonsDiv">
+                <button onclick="changePanel('states');">States</button>
+                <button onclick="changePanel('alphabet');">Alphabet</button>
+                <button onclick="changePanel('delta');">Delta</button>
+            </div>
             <hr>
-            <p>Arrows</p>
-            <table>
-                <thead>
-                    <tr>
-                        <th>From</th>
-                        <th>To</th>
-                        <th>Transition</th>
-                    </tr>
-                </thead>
-                <tbody id="arrowList"></tbody>
-            </table>
+            <div id="statesPanel" class="panelDiv activePanel">
+                <p>States</p>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>State</th>
+                            <th>Edit</th>
+                            <th>Accepting?</th>
+                        </tr>
+                    </thead>
+                    <tbody id="stateList"></tbody>
+                </table>
+                <hr>
+                <p>Arrows</p>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>From</th>
+                            <th>To</th>
+                            <th>Transition</th>
+                        </tr>
+                    </thead>
+                    <tbody id="arrowList"></tbody>
+                </table>
+            </div>
+            <div id="alphabetPanel" class="panelDiv">
+                <p>Alphabet Panel</p>
+                <table>
+                    <tbody id="alphabetTBody">
+                    </tbody>
+                </table>
+            </div>
+            <div id="deltaPanel" class="panelDiv">
+                <p>Delta Panel</p>
+                <table>
+                    <tbody id="deltaTBody">
+                    </tbody>
+                </table>
+            </div>
         </div>
+
         <div id="controlDiv">
         </div>
         <script src="utils.js"></script>
         <script src="pos.js"></script>
         <script src="vector.js"></script>
         <script src="proto_state.js"></script>
+        <script src="proto_letter.js"></script>
         <script src="strict_map.js"></script>
         <script src="dfa.js"></script>
         <script src="art.js"></script>

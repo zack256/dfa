@@ -6,8 +6,11 @@ function simpleCreateElement (tagName, text=null) {
     return el;
 }
 
-function makeBreak () {
+function makeBR () {
     return simpleCreateElement("BR");
+}
+function makeHR () {
+    return simpleCreateElement("HR");
 }
 
 function appendMultipleChildren (parentElement, childElements) {
@@ -52,8 +55,6 @@ function populateControl (protoState) {
     inp.id = "controlNameInp";
     let renameButton = simpleCreateElement("BUTTON", "Change name");
     renameButton.onclick = controlChangeStateName;
-    let deleteButton = simpleCreateElement("BUTTON", "Delete");
-    deleteButton.onclick = deleteSelectedState;
 
     let isAcceptingLabel = simpleCreateElement("LABEL", "Is Accepting?")
     let isAcceptingInput = simpleCreateElement("INPUT");
@@ -63,11 +64,14 @@ function populateControl (protoState) {
         setSelectedStateAsAccepting(isAcceptingInput);
     }
 
+    let deleteButton = simpleCreateElement("BUTTON", "Delete");
+    deleteButton.onclick = deleteSelectedState;
+
     let controlDiv = document.getElementById("controlDiv");
     appendMultipleChildren(controlDiv, 
-        [p, inp, renameButton, makeBreak(),
+        [p, inp, renameButton, makeBR(),
         isAcceptingLabel, isAcceptingInput,
-        makeBreak(), deleteButton]
+        makeBR(), deleteButton]
     );
 
 }
@@ -76,4 +80,20 @@ function clearControl () {
     while (controlDiv.children.length) {
         controlDiv.children[0].remove();
     }
+}
+
+function changePanel (panelName) {
+    document.getElementsByClassName("activePanel")[0].classList.remove("activePanel");
+    document.getElementById(panelName + "Panel").classList.add("activePanel");
+}
+
+function addLetterTR (letter) {
+    let tbody = document.getElementById("alphabetTBody");
+    let tr = simpleCreateElement("TR");
+    let td1 = simpleCreateElement("TD", letter.name);
+    let td2 = simpleCreateElement("TD");
+    let btn = simpleCreateElement("BUTTON", "Edit");
+    td2.appendChild(btn);
+    appendMultipleChildren(tr, [td1, td2]);
+    tbody.append(tr);
 }
