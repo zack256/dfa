@@ -21,7 +21,7 @@ function appendMultipleChildren (parentElement, childElements) {
     }
 }
 
-function createStateLI (name) {
+function createStateTR (name) {
 
     let td1 = simpleCreateElement("TD", name);
     let button = simpleCreateElement("BUTTON", "Edit");
@@ -39,16 +39,24 @@ function createStateLI (name) {
 
 }
 
-function createArrowTR (fromID, toID) {
-    let td1 = simpleCreateElement("TD", fromID);
-    let td2 = simpleCreateElement("TD", toID);
+function createArrowTR (protoArrow) {
+    let td1 = simpleCreateElement("TD", protoArrow.originID);
+    let td2 = simpleCreateElement("TD", protoArrow.destID);
     let td3 = simpleCreateElement("TD");
+    let btn = simpleCreateElement("BUTTON", "Edit");
+    let id = protoArrow.id;
+    btn.onclick = function () {
+        handleArrowEditButton(id);
+    }
+    let td4 = simpleCreateElement("TD");
+    td4.appendChild(btn);
     let tr = simpleCreateElement("TR");
-    appendMultipleChildren(tr, [td1, td2, td3]);
+    appendMultipleChildren(tr, [td1, td2, td3, td4]);
     arrowList.appendChild(tr);
 }
 
-function populateControl (protoState) {
+function populateStateControl (protoState) {
+    clearControl();
     let p = simpleCreateElement("P", "Editing " + protoState.name + " .");
     let inp = simpleCreateElement("INPUT");
     inp.value = protoState.name;
@@ -73,7 +81,15 @@ function populateControl (protoState) {
         isAcceptingLabel, isAcceptingInput,
         makeBR(), deleteButton]
     );
+}
 
+function populateArrowControl (protoArrow) {
+    clearControl();
+    let p1 = simpleCreateElement("P", "Editing transition.");
+    let p2 = simpleCreateElement("P", "From: " + protoStateMap.get(protoArrow.originID).name);
+    let p3 = simpleCreateElement("P", "To: " + protoStateMap.get(protoArrow.destID).name);
+    let p4 = simpleCreateElement("P", "Letter: " + protoLetterMap.get(protoArrow.letterID).name);
+    appendMultipleChildren(controlDiv, [p1, p2, p3, p4]);
 }
 
 function clearControl () {

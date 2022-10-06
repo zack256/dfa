@@ -81,15 +81,28 @@ function drawProtoStates () {
 }
 
 function drawProtoArrows () {
-    var arrowIDs, protoState1, protoState2, vec;
-    for (var i = 0; i < protoArrows.length; i++) {
-        arrowIDs = protoArrows[i];
-        protoState1 = protoStateMap.get(arrowIDs[0]);
-        protoState2 = protoStateMap.get(arrowIDs[1]);
+    var protoState1, protoState2, protoArrow, vec, midPointPos;
+    for (var i = 0; i < protoArrowList.length; i++) {
+        protoArrow = protoArrowList[i];
+        protoState1 = protoStateMap.get(protoArrow.originID);
+        protoState2 = protoStateMap.get(protoArrow.destID);
         vec = new Vector(protoState2.pos.x - protoState1.pos.x, protoState2.pos.y - protoState1.pos.y);
         vec = vec.parallelOfMagnitude(distance(protoState1.pos, protoState2.pos) - protoState2.radius);
         //drawLine(protoState1.pos, protoState2.pos);
+        if (protoArrow.id == selectedArrowID) {
+            ctx.strokeStyle = "blue";
+            ctx.fillStyle = "blue";
+        }
         drawArrow(protoState1.pos, new Pos(protoState1.pos.x + vec.x, protoState1.pos.y + vec.y));
+        //midPointPos = new Pos(protoState1.pos.x + vec.x / 2, protoState1.pos.y + vec.y / 2);
+        midPointPos = new Pos((protoState1.pos.x + protoState2.pos.x) / 2, (protoState1.pos.y + protoState2.pos.y) / 2);
+        if (protoArrow.letterID != -1) {
+            ctx.fillText(protoLetterMap.get(protoArrow.letterID).name, midPointPos.x, midPointPos.y);
+        }
+        if (protoArrow.id == selectedArrowID) {
+            ctx.strokeStyle = "black";
+            ctx.fillStyle = "black";
+        }
     }
 }
 

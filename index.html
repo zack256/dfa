@@ -42,6 +42,7 @@
                             <th>From</th>
                             <th>To</th>
                             <th>Transition</th>
+                            <th>Edit</th>
                         </tr>
                     </thead>
                     <tbody id="arrowList"></tbody>
@@ -53,6 +54,8 @@
                     <tbody id="alphabetTBody">
                     </tbody>
                 </table>
+                <input type="text" id="addLetterInput">
+                <button onclick="handleAddLetter();">Add Letter</button>
             </div>
             <div id="deltaPanel" class="panelDiv">
                 <p>Delta Panel</p>
@@ -70,6 +73,7 @@
         <script src="vector.js"></script>
         <script src="proto_state.js"></script>
         <script src="proto_letter.js"></script>
+        <script src="proto_arrow.js"></script>
         <script src="strict_map.js"></script>
         <script src="dfa.js"></script>
         <script src="art.js"></script>

@@ -22,16 +22,22 @@ let dfa = null;
 let protoStateList = [];
 let protoStateNames = new StrictMap();    // for now
 let protoStateMap = new StrictMap();
-let protoArrows = [];
 let nextProtoStateID = 1;
 
+let protoArrowList = [];
+let protoArrowMap = new StrictMap();
+let nextProtoArrowID = 1;
+
 let protoLetterMap, protoLetterNames, protoLetterList, nextProtoLetterID;
-let selectedStateID, arrowOrigin;
+let selectedStateID, selectedArrowID, arrowOrigin;
 
 let mousePos = new Pos(null, null);
 
 function GSS () {
     return protoStateMap.get(selectedStateID);
+}
+function GSA () {
+    return protoArrowMap.get(selectedArrowID);
 }
 
 function setupCanvas () {
@@ -72,7 +78,7 @@ function makeProtoState (pos) {
     protoStateList.push(protoState.id);
     protoStateNames.set(protoState.name, protoState.id);
     protoStateMap.set(nextProtoStateID, protoState);
-    createStateLI(protoState.name);
+    createStateTR(protoState.name);
     nextProtoStateID++;
     return true;
 }
@@ -93,11 +99,17 @@ function clearStates () {
     protoStateList = [];
     protoStateNames.clear();
     protoStateMap.clear();
-    protoArrows = [];
+    protoArrowList = [];
+    protoArrowMap.clear();
+    selectedStateID = -1;
+    selectedArrowID = -1;
+    nextProtoStateID = 1;   // Can rm if wanted.
+    nextProtoArrowID = 1;   // ""
+    nextProtoLetterID = 1;
     protoLetterMap.clear();
     protoLetterList = [];
-    selectedStateID = -1;
-    nextProtoStateID = 1;   // Can rm if wanted.
+    protoLetterNames.clear();
+    addLetter("a"); // tbd.
 }
 
 function getStateFromPos(pos) {
@@ -137,23 +149,53 @@ function setSelectedStateAsAccepting (inp) {
     stateList.children[GSS().idx].children[2].innerHTML = inp.checked ? "Yes" : "No";
 }
 
-function updateCurrentlySelectedState (newID) {
+function updateCurrentlySelectedState (newID, handleArrow=true) {
 
     //if (selectedStateIdx == idx) return;
+    console.log("yryry", handleArrow);
+    if (handleArrow) {
+        if (selectedArrowID != -1) {
+            updateCurrentlySelectedArrow(-1, false);
+        }
+    }
 
     if (selectedStateID != -1) {
-        let oldLI = stateList.children[GSS().idx];
-        oldLI.classList.remove("DFA_selectedState");
+        let oldTR = stateList.children[GSS().idx];
+        oldTR.classList.remove("DFA_selectedState");
         controlDiv.replaceChildren();
     }
     selectedStateID = newID;
     if (selectedStateID != -1) {
-        let newLI = stateList.children[GSS().idx];
-        newLI.classList.add("DFA_selectedState");
-        populateControl(GSS());
+        let newTR = stateList.children[GSS().idx];
+        newTR.classList.add("DFA_selectedState");
+        populateStateControl(GSS());
     } else {
         clearControl();
     }
+}
+
+function updateCurrentlySelectedArrow (newID, handleState=true) {
+    console.log("arr", handleState);
+    if (handleState) {
+        if (selectedStateID != -1) {
+            updateCurrentlySelectedState(-1, false);
+        }
+    }
+
+    if (selectedArrowID != -1) {
+        let oldTR = arrowList.children[GSA().idx];
+        oldTR.classList.remove("DFA_selectedState");
+        controlDiv.replaceChildren();
+    }
+    selectedArrowID = newID;
+    if (selectedArrowID != -1) {
+        let newTR = arrowList.children[GSA().idx];
+        newTR.classList.add("DFA_selectedState");
+        populateArrowControl(GSA());
+    } else {
+        clearControl();
+    }
+
 }
 
 function deleteSelectedState () {
@@ -168,14 +210,14 @@ function deleteSelectedState () {
        protoStateMap.get(protoStateList[i]).idx--;
     }
     let z = 0;
-    while (z < protoArrows.length) {
-        if (protoArrows[z][0] == selectedStateID || protoArrows[z][1] == selectedStateID) {
-            pop(protoArrows, z);
+    while (z < protoArrowList.length) {
+        if (protoArrowList[z].originID == selectedStateID || protoArrowList[z].destID == selectedStateID) {
+            pop(protoArrowList, z);
             arrowList.children[z].remove();
             continue;
         }
-        //if (protoArrows[z][0] > selectedStateIdx) protoArrows[z][0]--;
-        //if (protoArrows[z][1] > selectedStateIdx) protoArrows[z][1]--;
+        //if (protoArrowList[z][0] > selectedStateIdx) protoArrowList[z][0]--;
+        //if (protoArrowList[z][1] > selectedStateIdx) protoArrowList[z][1]--;
         z++;
     }
     //let protoState = pop(protoStateList, selectedStateIdx);
@@ -192,8 +234,12 @@ function makeArrow (fromID, toID) {
     if (!protoStateMap.get(fromID).outgoing.has(toID)) {
         protoStateMap.get(fromID).outgoing.set(toID, null); //tbd
         protoStateMap.get(toID).incoming.set(fromID, null);
-        protoArrows.push([fromID, toID]);
-        createArrowTR(fromID, toID);
+        let newProtoArrow = new ProtoArrow(nextProtoArrowID, protoArrowList.length, 1, fromID, toID);
+        nextProtoArrowID++;
+        protoArrowMap.set(newProtoArrow.id, newProtoArrow);
+        protoArrowList.push(newProtoArrow);
+        createArrowTR(newProtoArrow);
+        updateCurrentlySelectedArrow(newProtoArrow.id);
     }
 }
 
@@ -205,6 +251,30 @@ function addLetter (letterName) {
     protoLetterNames.set(letterName, letter.id);
     protoLetterMap.set(letter.id, letter);
     addLetterTR(letter);
+}
+
+function handleAddLetter () {
+    let inp = document.getElementById("addLetterInput");
+    let letterName = inp.value;
+    if (letterName == "") {
+        alert("Name can't be blank!");
+        return;
+    }
+    if (protoLetterNames.has(letterName)) {
+        alert("A letter \"" + letterName + "\" already exists!");
+        return;
+    }
+    addLetter(letterName);
+    inp.value = "";
+}
+
+function handleArrowEditButton (arrowID) {
+    /**
+    selectedStateID = -1;
+    selectedArrowID = arrowID;
+    populateArrowControl(protoArrowMap.get(arrowID));
+    **/
+   updateCurrentlySelectedArrow(arrowID);
 }
 
 function handleMouseUp (e) {
@@ -245,6 +315,7 @@ function goodReset () {
     protoLetterMap = new StrictMap();
     nextProtoLetterID = 1;
     selectedStateID = -1;
+    selectedArrowID = -1;
     arrowOrigin = -1;
 }
 
