@@ -42,7 +42,7 @@ function createStateTR (name) {
 function createArrowTR (protoArrow) {
     let td1 = simpleCreateElement("TD", protoArrow.originID);
     let td2 = simpleCreateElement("TD", protoArrow.destID);
-    let td3 = simpleCreateElement("TD");
+    let td3 = simpleCreateElement("TD", protoLetterMap.get(protoArrow.letterID).name);
     let btn = simpleCreateElement("BUTTON", "Edit");
     let id = protoArrow.id;
     btn.onclick = function () {
@@ -88,8 +88,22 @@ function populateArrowControl (protoArrow) {
     let p1 = simpleCreateElement("P", "Editing transition.");
     let p2 = simpleCreateElement("P", "From: " + protoStateMap.get(protoArrow.originID).name);
     let p3 = simpleCreateElement("P", "To: " + protoStateMap.get(protoArrow.destID).name);
-    let p4 = simpleCreateElement("P", "Letter: " + protoLetterMap.get(protoArrow.letterID).name);
-    appendMultipleChildren(controlDiv, [p1, p2, p3, p4]);
+    let label = simpleCreateElement("LABEL", "Letter: ");
+    let select = simpleCreateElement("SELECT");
+    select.id = "arrowControlLetterInp";
+    let option, letter;
+    for (const letterID of protoLetterList) {
+        letter = protoLetterMap.get(letterID);
+        option = simpleCreateElement("OPTION", letter.name);
+        if (protoArrow.letterID == letterID) {
+            option.setAttribute("selected", "selected");
+        }
+        select.appendChild(option);
+    }
+    let btn = simpleCreateElement("BUTTON", "Change");
+    btn.onclick = handleChangeTransitionButton;
+    //let p4 = simpleCreateElement("P", "Letter: " + protoLetterMap.get(protoArrow.letterID).name);
+    appendMultipleChildren(controlDiv, [p1, p2, p3, label, select, btn]);
 }
 
 function clearControl () {

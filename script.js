@@ -54,7 +54,6 @@ function getCanvasCoordinates (e) {
 }
 
 function makeProtoState (pos) {
-    //let msg = "State # " + getRandom2DecimalDigitNumber(0, 1000);
     let msg = "State # " + nextProtoStateID;
     let protoState = new ProtoState(nextProtoStateID, protoStateList.length, msg, pos, goodRadius, false);
 
@@ -74,7 +73,6 @@ function makeProtoState (pos) {
         return false;
     }
 
-    //protoStateList.push(protoState);
     protoStateList.push(protoState.id);
     protoStateNames.set(protoState.name, protoState.id);
     protoStateMap.set(nextProtoStateID, protoState);
@@ -124,7 +122,6 @@ function getStateFromPos(pos) {
 }
 
 function controlChangeStateName () {
-    //let oldName = protoStateList[selectedStateIdx].name;
     let oldName = protoStateMap.get(selectedStateID).name;
     let newName = document.getElementById("controlNameInp").value;
     if (oldName == newName) return;
@@ -152,7 +149,6 @@ function setSelectedStateAsAccepting (inp) {
 function updateCurrentlySelectedState (newID, handleArrow=true) {
 
     //if (selectedStateIdx == idx) return;
-    console.log("yryry", handleArrow);
     if (handleArrow) {
         if (selectedArrowID != -1) {
             updateCurrentlySelectedArrow(-1, false);
@@ -175,7 +171,6 @@ function updateCurrentlySelectedState (newID, handleArrow=true) {
 }
 
 function updateCurrentlySelectedArrow (newID, handleState=true) {
-    console.log("arr", handleState);
     if (handleState) {
         if (selectedStateID != -1) {
             updateCurrentlySelectedState(-1, false);
@@ -199,13 +194,6 @@ function updateCurrentlySelectedArrow (newID, handleState=true) {
 }
 
 function deleteSelectedState () {
-    /**
-    for (let i = GSS().idx + 1; i < protoStateList.length; i++) {
-        stateList.children[i].children[1].children[0].onclick = function () {
-            updateCurrentlySelectedState(protoStateList[i - 1]);
-        }
-    }
-    **/
    for (let i = GSS().idx + 1; i < protoStateList.length; i++) {
        protoStateMap.get(protoStateList[i]).idx--;
     }
@@ -216,8 +204,6 @@ function deleteSelectedState () {
             arrowList.children[z].remove();
             continue;
         }
-        //if (protoArrowList[z][0] > selectedStateIdx) protoArrowList[z][0]--;
-        //if (protoArrowList[z][1] > selectedStateIdx) protoArrowList[z][1]--;
         z++;
     }
     //let protoState = pop(protoStateList, selectedStateIdx);
@@ -266,15 +252,24 @@ function handleAddLetter () {
     }
     addLetter(letterName);
     inp.value = "";
+    if (selectedArrowID != -1) {
+        populateArrowControl(GSA());
+    }
 }
 
 function handleArrowEditButton (arrowID) {
-    /**
-    selectedStateID = -1;
-    selectedArrowID = arrowID;
-    populateArrowControl(protoArrowMap.get(arrowID));
-    **/
    updateCurrentlySelectedArrow(arrowID);
+}
+
+function handleChangeTransitionButton () {
+    // Handles when "change" button pressed on arrow's transition.
+    let inp = document.getElementById("arrowControlLetterInp");
+    let newLetter = inp.value;
+    if (protoLetterNames.has(newLetter)) {
+        let currentArrow = GSA();
+        currentArrow.letterID = protoLetterNames.get(newLetter);
+        arrowList.children[currentArrow.idx].children[2].innerHTML = protoLetterMap.get(currentArrow.letterID).name;
+    }
 }
 
 function handleMouseUp (e) {
