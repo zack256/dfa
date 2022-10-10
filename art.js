@@ -66,7 +66,7 @@ function drawProtoStates () {
         id = protoStateList[i];
         protoState = protoStateMap.get(id);
 
-        if (id == selectedStateID) {
+        if (CS[0] == "state" && id == CS[1]) {
             drawCircle(protoState.pos.x, protoState.pos.y, protoState.radius, "lightblue");
         } else {
             drawCircle(protoState.pos.x, protoState.pos.y, protoState.radius, "white");
@@ -83,13 +83,13 @@ function drawProtoStates () {
 function drawProtoArrows () {
     var protoState1, protoState2, protoArrow, vec, midPointPos;
     for (var i = 0; i < protoArrowList.length; i++) {
-        protoArrow = protoArrowList[i];
+        protoArrow = protoArrowMap.get(protoArrowList[i]);
         protoState1 = protoStateMap.get(protoArrow.originID);
         protoState2 = protoStateMap.get(protoArrow.destID);
         vec = new Vector(protoState2.pos.x - protoState1.pos.x, protoState2.pos.y - protoState1.pos.y);
         vec = vec.parallelOfMagnitude(distance(protoState1.pos, protoState2.pos) - protoState2.radius);
         //drawLine(protoState1.pos, protoState2.pos);
-        if (protoArrow.id == selectedArrowID) {
+        if (CS[0] == "arrow" && protoArrow.id == CS[1]) {
             ctx.strokeStyle = "blue";
             ctx.fillStyle = "blue";
         }
@@ -99,7 +99,7 @@ function drawProtoArrows () {
         if (protoArrow.letterID != -1) {
             ctx.fillText(protoLetterMap.get(protoArrow.letterID).name, midPointPos.x, midPointPos.y);
         }
-        if (protoArrow.id == selectedArrowID) {
+        if (CS[0] == "arrow" && protoArrow.id == CS[1]) {
             ctx.strokeStyle = "black";
             ctx.fillStyle = "black";
         }

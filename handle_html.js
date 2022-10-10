@@ -28,7 +28,8 @@ function createStateTR (name) {
     //let x = stateList.children.length - 1;
     let id = protoStateList[protoStateList.length - 1];
     button.onclick = function () {
-        updateCurrentlySelectedState(id);
+        //updateCurrentlySelectedState(id);
+        updateCS("state", id);
     }
     let td2 = simpleCreateElement("TD");
     td2.appendChild(button);
@@ -100,10 +101,12 @@ function populateArrowControl (protoArrow) {
         }
         select.appendChild(option);
     }
-    let btn = simpleCreateElement("BUTTON", "Change");
-    btn.onclick = handleChangeTransitionButton;
+    let renameBtn = simpleCreateElement("BUTTON", "Change");
+    renameBtn.onclick = handleChangeTransitionButton;
     //let p4 = simpleCreateElement("P", "Letter: " + protoLetterMap.get(protoArrow.letterID).name);
-    appendMultipleChildren(controlDiv, [p1, p2, p3, label, select, btn]);
+    let delBtn = simpleCreateElement("BUTTON", "Delete");
+    delBtn.onclick = handleDeleteTransitionButton;
+    appendMultipleChildren(controlDiv, [p1, p2, p3, label, select, renameBtn, makeBR(), delBtn]);
 }
 
 function clearControl () {

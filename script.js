@@ -16,6 +16,7 @@ const [canvas, ctx] = getCanvasAndContext();
 const statesDiv = document.getElementById("statesPanel");
 const stateList = document.getElementById("stateList");
 const arrowList = document.getElementById("arrowList");
+const letterList = document.getElementById("alphabetTBody");
 const controlDiv = document.getElementById("controlDiv");
 
 let dfa = null;
@@ -29,15 +30,21 @@ let protoArrowMap = new StrictMap();
 let nextProtoArrowID = 1;
 
 let protoLetterMap, protoLetterNames, protoLetterList, nextProtoLetterID;
-let selectedStateID, selectedArrowID, arrowOrigin;
+let CS, arrowOrigin;        // CS = currentlySelected, a list [what, ID]
 
 let mousePos = new Pos(null, null);
 
 function GSS () {
-    return protoStateMap.get(selectedStateID);
+    if (CS[0] != "state") {
+        err("GSS when no state selected!");
+    }
+    return protoStateMap.get(CS[1]);
 }
 function GSA () {
-    return protoArrowMap.get(selectedArrowID);
+    if (CS[0] != "arrow") {
+        err("GSA when no arrow selected!");
+    }
+    return protoArrowMap.get(CS[1]);
 }
 
 function setupCanvas () {
@@ -91,22 +98,24 @@ function newStateWillIntersectExisting (newProtoState) {
 }
 
 function clearStates () {
+    // errm, why do we have this?
     stateList.replaceChildren();
     controlDiv.replaceChildren();
     arrowList.replaceChildren();
+    letterList.replaceChildren();
     protoStateList = [];
     protoStateNames.clear();
     protoStateMap.clear();
     protoArrowList = [];
     protoArrowMap.clear();
-    selectedStateID = -1;
-    selectedArrowID = -1;
+    currentlySelected = [null, -1];
     nextProtoStateID = 1;   // Can rm if wanted.
     nextProtoArrowID = 1;   // ""
     nextProtoLetterID = 1;
     protoLetterMap.clear();
     protoLetterList = [];
     protoLetterNames.clear();
+    CS = [null, -1];
     addLetter("a"); // tbd.
 }
 
@@ -122,7 +131,7 @@ function getStateFromPos(pos) {
 }
 
 function controlChangeStateName () {
-    let oldName = protoStateMap.get(selectedStateID).name;
+    let oldName = protoStateMap.get(CS[1]).name;
     let newName = document.getElementById("controlNameInp").value;
     if (oldName == newName) return;
     if (newName == "") {
@@ -134,18 +143,18 @@ function controlChangeStateName () {
         return;
     } else {
         protoStateNames.delete(oldName);
-        protoStateNames.set(newName, selectedStateID);
-        protoStateMap.get(selectedStateID).name = newName;
+        protoStateNames.set(newName, CS[1]);
+        protoStateMap.get(CS[1]).name = newName;
         stateList.children[GSS().idx].children[0].innerHTML = newName;
     }
 }
 
 function setSelectedStateAsAccepting (inp) {
-    //protoStateList[selectedStateIdx].isAccepting = inp.checked;
     GSS().isAccepting = inp.checked;
     stateList.children[GSS().idx].children[2].innerHTML = inp.checked ? "Yes" : "No";
 }
 
+/**
 function updateCurrentlySelectedState (newID, handleArrow=true) {
 
     //if (selectedStateIdx == idx) return;
@@ -192,14 +201,50 @@ function updateCurrentlySelectedArrow (newID, handleState=true) {
     }
 
 }
+**/
+
+function deselectCurrent () {
+    let oldTR;
+    if (CS[0] == "state") {
+        oldTR = stateList.children[GSS().idx];
+        oldTR.classList.remove("DFA_selectedState");
+    } else if (CS[0] == "arrow") {
+        oldTR = arrowList.children[GSA().idx];
+        oldTR.classList.remove("DFA_selectedState");
+    }
+    controlDiv.replaceChildren();
+    CS[0] = null;
+    CS[1] = -1;
+}
+
+function updateCS (newWhat, newID) {
+    deselectCurrent();
+    CS[0] = newWhat;
+    CS[1] = newID;
+    let newTR;
+    if (CS[0] == "state") {
+        newTR = stateList.children[GSS().idx];
+        newTR.classList.add("DFA_selectedState");
+        populateStateControl(GSS());
+    } else if (CS[0] == "arrow") {
+        newTR = arrowList.children[GSA().idx];
+        newTR.classList.add("DFA_selectedState");
+        populateArrowControl(GSA());
+    }
+}
 
 function deleteSelectedState () {
-   for (let i = GSS().idx + 1; i < protoStateList.length; i++) {
+    // Assumes a state is selected!
+    let protoState = GSS();
+    updateCS(null, -1);
+    for (let i = protoState.idx + 1; i < protoStateList.length; i++) {
        protoStateMap.get(protoStateList[i]).idx--;
     }
-    let z = 0;
+    let z = 0, protoArrow;
     while (z < protoArrowList.length) {
-        if (protoArrowList[z].originID == selectedStateID || protoArrowList[z].destID == selectedStateID) {
+        protoArrow = protoArrowMap.get(protoArrowList[z]);
+        if (protoArrow.originID == protoState.id || protoArrow.destID == protoState.id) {
+            // TODO/BUG : re-index arrows after a state is deleted.
             pop(protoArrowList, z);
             arrowList.children[z].remove();
             continue;
@@ -207,13 +252,13 @@ function deleteSelectedState () {
         z++;
     }
     //let protoState = pop(protoStateList, selectedStateIdx);
-    let protoState = GSS();
     pop(protoStateList, protoState.idx);
     protoStateNames.delete(protoState.name);
     stateList.children[protoState.idx].remove();
-    protoStateMap.delete(selectedStateID);
-    selectedStateID = -1;
-    updateCurrentlySelectedState(-1);
+    //protoStateMap.delete(selectedStateID);
+    protoStateMap.delete(protoState.id);
+    //selectedStateID = -1;
+    //updateCurrentlySelectedState(-1);
 }
 
 function makeArrow (fromID, toID) {
@@ -223,9 +268,10 @@ function makeArrow (fromID, toID) {
         let newProtoArrow = new ProtoArrow(nextProtoArrowID, protoArrowList.length, 1, fromID, toID);
         nextProtoArrowID++;
         protoArrowMap.set(newProtoArrow.id, newProtoArrow);
-        protoArrowList.push(newProtoArrow);
+        protoArrowList.push(newProtoArrow.id);
         createArrowTR(newProtoArrow);
-        updateCurrentlySelectedArrow(newProtoArrow.id);
+        //updateCurrentlySelectedArrow(newProtoArrow.id);
+        updateCS("arrow", newProtoArrow.id);
     }
 }
 
@@ -252,13 +298,15 @@ function handleAddLetter () {
     }
     addLetter(letterName);
     inp.value = "";
-    if (selectedArrowID != -1) {
+    //if (selectedArrowID != -1) {
+    if (CS[0] == "arrow") {
         populateArrowControl(GSA());
     }
 }
 
 function handleArrowEditButton (arrowID) {
-   updateCurrentlySelectedArrow(arrowID);
+   //updateCurrentlySelectedArrow(arrowID);
+   updateCS("arrow", arrowID);
 }
 
 function handleChangeTransitionButton () {
@@ -272,6 +320,26 @@ function handleChangeTransitionButton () {
     }
 }
 
+function handleDeleteTransitionButton () {
+    let arrow = GSA();
+    updateCS(null, -1);
+
+    for (var i = arrow.idx + 1; i < protoArrowList.length; i++) {
+        protoArrowMap.get(protoArrowList[i]).idx--;
+    }
+    pop(protoArrowList, arrow.idx);
+    arrowList.children[arrow.idx].remove();
+
+    protoStateMap.get(arrow.originID).outgoing.delete(arrow.destID);
+    protoStateMap.get(arrow.destID).incoming.delete(arrow.originID);
+
+    protoArrowMap.delete(arrow.id);
+    //selectedArrowID = -1;
+    //updateCurrentlySelectedArrow(-1);
+    //updateCS("arrow", -1);
+    //updateCS(null, -1);
+}
+
 function handleMouseUp (e) {
     let pos = getCanvasCoordinates(e);
     let IDOfstateClicked = getStateFromPos(pos);
@@ -282,13 +350,15 @@ function handleMouseUp (e) {
         } else {
             let res = makeProtoState(pos);
             if (res) {
-                updateCurrentlySelectedState(nextProtoStateID - 1);
+                //updateCurrentlySelectedState(nextProtoStateID - 1);
+                updateCS("state", nextProtoStateID - 1);    // bad
             }
         }
     } else {
         if (arrowOrigin == IDOfstateClicked) arrowOrigin = -1; // keep :)
         if (arrowOrigin == -1) {
-            updateCurrentlySelectedState(IDOfstateClicked);
+            //updateCurrentlySelectedState(IDOfstateClicked);
+            updateCS("state", IDOfstateClicked);
         } else {
             makeArrow(arrowOrigin, IDOfstateClicked);
             arrowOrigin = -1;
@@ -309,8 +379,9 @@ function goodReset () {
     protoLetterNames = new StrictMap();
     protoLetterMap = new StrictMap();
     nextProtoLetterID = 1;
-    selectedStateID = -1;
-    selectedArrowID = -1;
+    //selectedStateID = -1;
+    //selectedArrowID = -1;
+    CS = [null, -1];
     arrowOrigin = -1;
 }
 

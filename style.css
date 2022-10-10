@@ -46,3 +46,7 @@
 .activePanel {
     display : block;
 }
+
+#leftDiv {
+    padding : 0.25em;
+}
