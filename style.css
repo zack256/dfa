@@ -50,3 +50,8 @@
 #leftDiv {
     padding : 0.25em;
 }
+
+#statesContainer, #arrowsContainer {
+    max-height: 300px;
+    overflow-y: scroll;
+}

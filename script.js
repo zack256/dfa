@@ -154,55 +154,6 @@ function setSelectedStateAsAccepting (inp) {
     stateList.children[GSS().idx].children[2].innerHTML = inp.checked ? "Yes" : "No";
 }
 
-/**
-function updateCurrentlySelectedState (newID, handleArrow=true) {
-
-    //if (selectedStateIdx == idx) return;
-    if (handleArrow) {
-        if (selectedArrowID != -1) {
-            updateCurrentlySelectedArrow(-1, false);
-        }
-    }
-
-    if (selectedStateID != -1) {
-        let oldTR = stateList.children[GSS().idx];
-        oldTR.classList.remove("DFA_selectedState");
-        controlDiv.replaceChildren();
-    }
-    selectedStateID = newID;
-    if (selectedStateID != -1) {
-        let newTR = stateList.children[GSS().idx];
-        newTR.classList.add("DFA_selectedState");
-        populateStateControl(GSS());
-    } else {
-        clearControl();
-    }
-}
-
-function updateCurrentlySelectedArrow (newID, handleState=true) {
-    if (handleState) {
-        if (selectedStateID != -1) {
-            updateCurrentlySelectedState(-1, false);
-        }
-    }
-
-    if (selectedArrowID != -1) {
-        let oldTR = arrowList.children[GSA().idx];
-        oldTR.classList.remove("DFA_selectedState");
-        controlDiv.replaceChildren();
-    }
-    selectedArrowID = newID;
-    if (selectedArrowID != -1) {
-        let newTR = arrowList.children[GSA().idx];
-        newTR.classList.add("DFA_selectedState");
-        populateArrowControl(GSA());
-    } else {
-        clearControl();
-    }
-
-}
-**/
-
 function deselectCurrent () {
     let oldTR;
     if (CS[0] == "state") {
@@ -244,33 +195,29 @@ function deleteSelectedState () {
     while (z < protoArrowList.length) {
         protoArrow = protoArrowMap.get(protoArrowList[z]);
         if (protoArrow.originID == protoState.id || protoArrow.destID == protoState.id) {
-            // TODO/BUG : re-index arrows after a state is deleted.
             pop(protoArrowList, z);
             arrowList.children[z].remove();
-            continue;
+        } else {
+            protoArrowMap.get(protoArrowList[z]).idx = z;
+            z++;
         }
-        z++;
     }
-    //let protoState = pop(protoStateList, selectedStateIdx);
     pop(protoStateList, protoState.idx);
     protoStateNames.delete(protoState.name);
     stateList.children[protoState.idx].remove();
-    //protoStateMap.delete(selectedStateID);
     protoStateMap.delete(protoState.id);
-    //selectedStateID = -1;
-    //updateCurrentlySelectedState(-1);
 }
 
 function makeArrow (fromID, toID) {
     if (!protoStateMap.get(fromID).outgoing.has(toID)) {
-        protoStateMap.get(fromID).outgoing.set(toID, null); //tbd
-        protoStateMap.get(toID).incoming.set(fromID, null);
+
         let newProtoArrow = new ProtoArrow(nextProtoArrowID, protoArrowList.length, 1, fromID, toID);
         nextProtoArrowID++;
+        protoStateMap.get(fromID).outgoing.set(toID, newProtoArrow.id);
+        protoStateMap.get(toID).incoming.set(fromID, newProtoArrow.id);
         protoArrowMap.set(newProtoArrow.id, newProtoArrow);
         protoArrowList.push(newProtoArrow.id);
         createArrowTR(newProtoArrow);
-        //updateCurrentlySelectedArrow(newProtoArrow.id);
         updateCS("arrow", newProtoArrow.id);
     }
 }
@@ -334,10 +281,6 @@ function handleDeleteTransitionButton () {
     protoStateMap.get(arrow.destID).incoming.delete(arrow.originID);
 
     protoArrowMap.delete(arrow.id);
-    //selectedArrowID = -1;
-    //updateCurrentlySelectedArrow(-1);
-    //updateCS("arrow", -1);
-    //updateCS(null, -1);
 }
 
 function handleMouseUp (e) {
@@ -379,8 +322,6 @@ function goodReset () {
     protoLetterNames = new StrictMap();
     protoLetterMap = new StrictMap();
     nextProtoLetterID = 1;
-    //selectedStateID = -1;
-    //selectedArrowID = -1;
     CS = [null, -1];
     arrowOrigin = -1;
 }

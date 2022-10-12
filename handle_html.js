@@ -13,6 +13,17 @@ function makeHR () {
     return simpleCreateElement("HR");
 }
 
+function makeTable (header, rows) {
+    let table = simpleCreateElement("TABLE");
+    let thead = simpleCreateElement("THEAD");
+    let tbody = simpleCreateElement("TBODY");
+    thead.appendChild(header);
+    appendMultipleChildren(tbody, rows);
+    table.appendChild(thead);
+    table.appendChild(tbody);
+    return table;
+}
+
 function appendMultipleChildren (parentElement, childElements) {
     var childElement;
     for (var i = 0; i < childElements.length; i++) {
@@ -58,7 +69,7 @@ function createArrowTR (protoArrow) {
 
 function populateStateControl (protoState) {
     clearControl();
-    let p = simpleCreateElement("P", "Editing " + protoState.name + " .");
+    let p1 = simpleCreateElement("P", "Editing " + protoState.name + " .");
     let inp = simpleCreateElement("INPUT");
     inp.value = protoState.name;
     inp.id = "controlNameInp";
@@ -76,12 +87,61 @@ function populateStateControl (protoState) {
     let deleteButton = simpleCreateElement("BUTTON", "Delete");
     deleteButton.onclick = deleteSelectedState;
 
+    let p2 = simpleCreateElement("P", "Outgoing Transitions");
+    let TTHeader = simpleCreateElement("TR");
+    appendMultipleChildren(TTHeader, [
+        simpleCreateElement("TH", "To"),
+        simpleCreateElement("TH", "Letter"),
+        simpleCreateElement("TH", "Edit")
+    ]);
+    
+    let TTRows = [], tr, arrow, btn;
+    for (const [stateID, arrowID] of protoState.outgoing.entries()) {
+        state = protoStateMap.get(stateID);
+        arrow = protoArrowMap.get(arrowID);
+        tr = simpleCreateElement("TR");
+        btn = simpleCreateElement("BUTTON", "Edit");
+        btn.onclick = function () { handleArrowEditButton(arrowID); }
+        appendMultipleChildren(tr, [
+            simpleCreateElement("TD", state.name),
+            simpleCreateElement("TD", protoLetterMap.get(arrow.letterID).name),
+            btn
+        ]);
+        TTRows.push(tr);
+    }
+    let outgoingTable = makeTable(TTHeader, TTRows);
+
+    let p3 = simpleCreateElement("P", "Incoming Transitions");
+    TTHeader = simpleCreateElement("TR");
+    appendMultipleChildren(TTHeader, [
+        simpleCreateElement("TH", "From"),
+        simpleCreateElement("TH", "Letter"),
+        simpleCreateElement("TH", "Edit")
+    ]);
+
+    TTRows = [];
+    for (const [stateID, arrowID] of protoState.incoming.entries()) {
+        state = protoStateMap.get(stateID);
+        arrow = protoArrowMap.get(arrowID);
+        tr = simpleCreateElement("TR");
+        btn = simpleCreateElement("BUTTON", "Edit");
+        btn.onclick = function () { handleArrowEditButton(arrowID); }
+        appendMultipleChildren(tr, [
+            simpleCreateElement("TD", state.name),
+            simpleCreateElement("TD", protoLetterMap.get(arrow.letterID).name),
+            btn
+        ]);
+        TTRows.push(tr);
+    }
+    let incomingTable = makeTable(TTHeader, TTRows);
+
     let controlDiv = document.getElementById("controlDiv");
     appendMultipleChildren(controlDiv, 
-        [p, inp, renameButton, makeBR(),
+        [p1, inp, renameButton, makeBR(),
         isAcceptingLabel, isAcceptingInput,
-        makeBR(), deleteButton]
+        makeBR(), deleteButton, p2, outgoingTable, p3, incomingTable]
     );
+
 }
 
 function populateArrowControl (protoArrow) {
