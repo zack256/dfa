@@ -169,6 +169,19 @@ function populateArrowControl (protoArrow) {
     appendMultipleChildren(controlDiv, [p1, p2, p3, label, select, renameBtn, makeBR(), delBtn]);
 }
 
+function populateLetterControl (letter) {
+    clearControl();
+    let p = simpleCreateElement("P", "Editing letter");
+    let inp = simpleCreateElement("INPUT");
+    inp.value = letter.name;
+    inp.id = "letterControlNameInp";
+    let renameButton = simpleCreateElement("BUTTON", "Change name");
+    renameButton.onclick = controlChangeLetterName;
+    appendMultipleChildren(controlDiv, [
+        p, inp, renameButton
+    ]);
+}
+
 function clearControl () {
     while (controlDiv.children.length) {
         controlDiv.children[0].remove();
@@ -186,6 +199,9 @@ function addLetterTR (letter) {
     let td1 = simpleCreateElement("TD", letter.name);
     let td2 = simpleCreateElement("TD");
     let btn = simpleCreateElement("BUTTON", "Edit");
+    btn.onclick = function () {
+        handleEditLetterButton(letter.id);
+    }
     td2.appendChild(btn);
     appendMultipleChildren(tr, [td1, td2]);
     tbody.append(tr);

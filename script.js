@@ -47,6 +47,13 @@ function GSA () {
     return protoArrowMap.get(CS[1]);
 }
 
+function GSL () {
+    if (CS[0] != "letter") {
+        err("GSL when no letter selected!");
+    }
+    return protoLetterMap.get(CS[1]);
+}
+
 function setupCanvas () {
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
@@ -162,6 +169,9 @@ function deselectCurrent () {
     } else if (CS[0] == "arrow") {
         oldTR = arrowList.children[GSA().idx];
         oldTR.classList.remove("DFA_selectedState");
+    } else if (CS[0] == "letter") {
+        oldTR = letterList.children[GSL().idx];
+        oldTR.classList.remove("DFA_selectedState");
     }
     controlDiv.replaceChildren();
     CS[0] = null;
@@ -181,6 +191,10 @@ function updateCS (newWhat, newID) {
         newTR = arrowList.children[GSA().idx];
         newTR.classList.add("DFA_selectedState");
         populateArrowControl(GSA());
+    } else if (CS[0] == "letter") {
+        newTR = letterList.children[GSL().idx];
+        newTR.classList.add("DFA_selectedState");
+        populateLetterControl(GSL());
     }
 }
 
@@ -230,6 +244,7 @@ function addLetter (letterName) {
     protoLetterNames.set(letterName, letter.id);
     protoLetterMap.set(letter.id, letter);
     addLetterTR(letter);
+    updateCS("letter", letter.id);
 }
 
 function handleAddLetter () {
@@ -281,6 +296,35 @@ function handleDeleteTransitionButton () {
     protoStateMap.get(arrow.destID).incoming.delete(arrow.originID);
 
     protoArrowMap.delete(arrow.id);
+}
+
+function handleEditLetterButton (letterID) {
+    updateCS("letter", letterID);
+}
+
+function controlChangeLetterName () {
+    let inp = document.getElementById("letterControlNameInp");
+    let newName = inp.value;
+    if (newName == "") {
+        alert("Name can't be blank!");
+    } else if (protoLetterNames.has(newName)) {
+        alert("A letter \"" + newName + "\" already exists!");
+    } else {
+        let currentLetter = GSL();
+        protoLetterNames.delete(currentLetter.name);
+        currentLetter.name = newName;
+        protoLetterNames.set(currentLetter.name, currentLetter.id);
+
+        // Goes thru arrow list and replaces transition displays if updated
+        for (var i = 0; i < protoArrowList.length; i++) {
+            if (protoArrowMap.get(protoArrowList[i]).letterID == currentLetter.id) {
+                arrowList.children[i].children[2].innerHTML = currentLetter.name;
+            }
+        }
+
+        // Updates HTML letter list
+        letterList.children[currentLetter.idx].children[0].innerHTML = currentLetter.name;
+    }
 }
 
 function handleMouseUp (e) {

@@ -81,7 +81,7 @@ function drawProtoStates () {
 }
 
 function drawProtoArrows () {
-    var protoState1, protoState2, protoArrow, vec, midPointPos;
+    var protoState1, protoState2, protoArrow, vec, midPointPos, isHighlighting;
     for (var i = 0; i < protoArrowList.length; i++) {
         protoArrow = protoArrowMap.get(protoArrowList[i]);
         protoState1 = protoStateMap.get(protoArrow.originID);
@@ -89,7 +89,11 @@ function drawProtoArrows () {
         vec = new Vector(protoState2.pos.x - protoState1.pos.x, protoState2.pos.y - protoState1.pos.y);
         vec = vec.parallelOfMagnitude(distance(protoState1.pos, protoState2.pos) - protoState2.radius);
         //drawLine(protoState1.pos, protoState2.pos);
-        if (CS[0] == "arrow" && protoArrow.id == CS[1]) {
+        isHighlighting = (
+            (CS[0] == "arrow" && protoArrow.id == CS[1]) ||
+            (CS[0] == "letter" && protoArrow.letterID == CS[1])
+        );
+        if (isHighlighting) {
             ctx.strokeStyle = "blue";
             ctx.fillStyle = "blue";
         }
@@ -99,7 +103,7 @@ function drawProtoArrows () {
         if (protoArrow.letterID != -1) {
             ctx.fillText(protoLetterMap.get(protoArrow.letterID).name, midPointPos.x, midPointPos.y);
         }
-        if (CS[0] == "arrow" && protoArrow.id == CS[1]) {
+        if (isHighlighting) {
             ctx.strokeStyle = "black";
             ctx.fillStyle = "black";
         }
