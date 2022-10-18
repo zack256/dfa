@@ -40,3 +40,8 @@ function pop (arr, idx) {
     let l = arr.splice(idx, 1);
     return l[0];
 }
+
+function mod (a, b) {
+    let r = a % b;
+    return r < 0 ? r + b : r;
+}

@@ -15,11 +15,13 @@ function makeHR () {
 
 function makeTable (header, rows) {
     let table = simpleCreateElement("TABLE");
-    let thead = simpleCreateElement("THEAD");
+    if (header != null) {
+        let thead = simpleCreateElement("THEAD");
+        thead.appendChild(header);
+        table.appendChild(thead);
+    }
     let tbody = simpleCreateElement("TBODY");
-    thead.appendChild(header);
     appendMultipleChildren(tbody, rows);
-    table.appendChild(thead);
     table.appendChild(tbody);
     return table;
 }
@@ -52,8 +54,8 @@ function createStateTR (name) {
 }
 
 function createArrowTR (protoArrow) {
-    let td1 = simpleCreateElement("TD", protoArrow.originID);
-    let td2 = simpleCreateElement("TD", protoArrow.destID);
+    let td1 = simpleCreateElement("TD", protoStateMap.get(protoArrow.originID).name);
+    let td2 = simpleCreateElement("TD", protoStateMap.get(protoArrow.destID).name);
     let td3 = simpleCreateElement("TD", protoLetterMap.get(protoArrow.letterID).name);
     let btn = simpleCreateElement("BUTTON", "Edit");
     let id = protoArrow.id;
@@ -135,11 +137,17 @@ function populateStateControl (protoState) {
     }
     let incomingTable = makeTable(TTHeader, TTRows);
 
+    let prevBtn = simpleCreateElement("BUTTON", "Previous");
+    prevBtn.onclick = function () { cycleDisplay(-1) };
+    let nextBtn = simpleCreateElement("BUTTON", "Next");
+    nextBtn.onclick = function () { cycleDisplay(1) };
+
     let controlDiv = document.getElementById("controlDiv");
     appendMultipleChildren(controlDiv, 
         [p1, inp, renameButton, makeBR(),
         isAcceptingLabel, isAcceptingInput,
-        makeBR(), deleteButton, p2, outgoingTable, p3, incomingTable]
+        makeBR(), deleteButton, p2, outgoingTable, p3,
+        incomingTable, prevBtn, nextBtn]
     );
 
 }
@@ -147,8 +155,28 @@ function populateStateControl (protoState) {
 function populateArrowControl (protoArrow) {
     clearControl();
     let p1 = simpleCreateElement("P", "Editing transition.");
-    let p2 = simpleCreateElement("P", "From: " + protoStateMap.get(protoArrow.originID).name);
-    let p3 = simpleCreateElement("P", "To: " + protoStateMap.get(protoArrow.destID).name);
+    let td1, td2, td3, btn, tr1, tr2, tbl;
+
+    td1 = simpleCreateElement("TD", "From:");
+    td2 = simpleCreateElement("TD", protoStateMap.get(protoArrow.originID).name);
+    btn = simpleCreateElement("BUTTON", "Go");
+    btn.onclick = function () { updateCS("state", protoArrow.originID) };
+    td3 = simpleCreateElement("TD");
+    td3.appendChild(btn);
+    tr1 = simpleCreateElement("TR");
+    appendMultipleChildren(tr1, [td1, td2, td3]);
+
+    td1 = simpleCreateElement("TD", "To:");
+    td2 = simpleCreateElement("TD", protoStateMap.get(protoArrow.destID).name);
+    btn = simpleCreateElement("BUTTON", "Go");
+    btn.onclick = function () { updateCS("state", protoArrow.destID) };
+    td3 = simpleCreateElement("TD");
+    td3.appendChild(btn);
+    tr2 = simpleCreateElement("TR");
+    appendMultipleChildren(tr2, [td1, td2, td3]);
+
+    tbl = makeTable(null, [tr1, tr2]);
+
     let label = simpleCreateElement("LABEL", "Letter: ");
     let select = simpleCreateElement("SELECT");
     select.id = "arrowControlLetterInp";
@@ -166,7 +194,14 @@ function populateArrowControl (protoArrow) {
     //let p4 = simpleCreateElement("P", "Letter: " + protoLetterMap.get(protoArrow.letterID).name);
     let delBtn = simpleCreateElement("BUTTON", "Delete");
     delBtn.onclick = handleDeleteTransitionButton;
-    appendMultipleChildren(controlDiv, [p1, p2, p3, label, select, renameBtn, makeBR(), delBtn]);
+
+    let prevBtn = simpleCreateElement("BUTTON", "Previous");
+    prevBtn.onclick = function () { cycleDisplay(-1) };
+    let nextBtn = simpleCreateElement("BUTTON", "Next");
+    nextBtn.onclick = function () { cycleDisplay(1) };
+
+    appendMultipleChildren(controlDiv, [p1, tbl, label, select, renameBtn, makeBR(),
+        delBtn, makeBR(), prevBtn, nextBtn]);
 }
 
 function populateLetterControl (letter) {
@@ -177,8 +212,14 @@ function populateLetterControl (letter) {
     inp.id = "letterControlNameInp";
     let renameButton = simpleCreateElement("BUTTON", "Change name");
     renameButton.onclick = controlChangeLetterName;
+
+    let prevBtn = simpleCreateElement("BUTTON", "Previous");
+    prevBtn.onclick = function () { cycleDisplay(-1) };
+    let nextBtn = simpleCreateElement("BUTTON", "Next");
+    nextBtn.onclick = function () { cycleDisplay(1) };
+
     appendMultipleChildren(controlDiv, [
-        p, inp, renameButton
+        p, inp, renameButton, makeBR(), prevBtn, nextBtn
     ]);
 }
 

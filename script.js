@@ -138,7 +138,8 @@ function getStateFromPos(pos) {
 }
 
 function controlChangeStateName () {
-    let oldName = protoStateMap.get(CS[1]).name;
+    let ps = GSS();
+    let oldName = ps.name;
     let newName = document.getElementById("controlNameInp").value;
     if (oldName == newName) return;
     if (newName == "") {
@@ -151,8 +152,19 @@ function controlChangeStateName () {
     } else {
         protoStateNames.delete(oldName);
         protoStateNames.set(newName, CS[1]);
-        protoStateMap.get(CS[1]).name = newName;
-        stateList.children[GSS().idx].children[0].innerHTML = newName;
+        ps.name = newName;
+        stateList.children[ps.idx].children[0].innerHTML = newName;
+        // Updates state names in arrow table if needed
+        let pa;
+        for (var i = 0; i < protoArrowList.length; i++) {
+            pa = protoArrowMap.get(protoArrowList[i]);
+            if (pa.originID == ps.id) {
+                arrowList.children[pa.idx].children[0].innerHTML = ps.name;
+            }
+            if (pa.destID == ps.id) {
+                arrowList.children[pa.idx].children[1].innerHTML = ps.name;
+            }
+        }
     }
 }
 
@@ -196,6 +208,25 @@ function updateCS (newWhat, newID) {
         newTR.classList.add("DFA_selectedState");
         populateLetterControl(GSL());
     }
+}
+
+function cycleDisplay (direction) {
+    // Probably telling us to abstract more
+    let idx, newIdx, newID;
+    if (CS[0] == "state") {
+        idx = GSS().idx;
+        newIdx = mod((idx + direction), protoStateList.length);
+        newID = protoStateList[newIdx];
+    } else if (CS[0] == "arrow") {
+        idx = GSA().idx;
+        newIdx = mod((idx + direction), protoArrowList.length);
+        newID = protoArrowList[newIdx];
+    } else if (CS[0] == "letter") {
+        idx = GSL().idx;
+        newIdx = mod((idx + direction), protoLetterList.length);
+        newID = protoLetterList[newIdx];
+    }
+    updateCS(CS[0], newID);
 }
 
 function deleteSelectedState () {
