@@ -144,10 +144,10 @@ function populateStateControl (protoState) {
 
     let controlDiv = document.getElementById("controlDiv");
     appendMultipleChildren(controlDiv, 
-        [p1, inp, renameButton, makeBR(),
+        [p1, prevBtn, nextBtn, makeBR(), inp, renameButton, makeBR(),
         isAcceptingLabel, isAcceptingInput,
         makeBR(), deleteButton, p2, outgoingTable, p3,
-        incomingTable, prevBtn, nextBtn]
+        incomingTable]
     );
 
 }
@@ -155,32 +155,64 @@ function populateStateControl (protoState) {
 function populateArrowControl (protoArrow) {
     clearControl();
     let p1 = simpleCreateElement("P", "Editing transition.");
-    let td1, td2, td3, btn, tr1, tr2, tbl;
+    let td1, td2, td3, td4, btn1, btn2, tr1, tr2, tbl, label, select, option;
 
     td1 = simpleCreateElement("TD", "From:");
-    td2 = simpleCreateElement("TD", protoStateMap.get(protoArrow.originID).name);
-    btn = simpleCreateElement("BUTTON", "Go");
-    btn.onclick = function () { updateCS("state", protoArrow.originID) };
+    //td2 = simpleCreateElement("TD", protoStateMap.get(protoArrow.originID).name);
+    select = simpleCreateElement("SELECT");
+    select.id = "arrowControlOriginInput";
+    for (const protoStateID of protoStateList) {
+        protoState = protoStateMap.get(protoStateID);
+        option = simpleCreateElement("OPTION", protoState.name);
+        if (protoState.id == protoArrow.originID) {
+            option.setAttribute("selected", "selected");
+        }
+        select.appendChild(option);
+    }
+    td2 = simpleCreateElement("TD");
+    td2.appendChild(select);
+    btn1 = simpleCreateElement("BUTTON", "Change");
+    btn1.onclick = handleChangeArrowOriginButton;
     td3 = simpleCreateElement("TD");
-    td3.appendChild(btn);
+    td3.appendChild(btn1);
+    btn2 = simpleCreateElement("BUTTON", "Go");
+    btn2.onclick = function () { updateCS("state", protoArrow.originID) };
+    td4 = simpleCreateElement("TD");
+    td4.appendChild(btn2);
     tr1 = simpleCreateElement("TR");
-    appendMultipleChildren(tr1, [td1, td2, td3]);
+    appendMultipleChildren(tr1, [td1, td2, td3, td4]);
 
     td1 = simpleCreateElement("TD", "To:");
-    td2 = simpleCreateElement("TD", protoStateMap.get(protoArrow.destID).name);
-    btn = simpleCreateElement("BUTTON", "Go");
-    btn.onclick = function () { updateCS("state", protoArrow.destID) };
+    //td2 = simpleCreateElement("TD", protoStateMap.get(protoArrow.destID).name);
+    select = simpleCreateElement("SELECT");
+    select.id = "arrowControlDestInput";
+    for (const protoStateID of protoStateList) {
+        protoState = protoStateMap.get(protoStateID);
+        option = simpleCreateElement("OPTION", protoState.name);
+        if (protoState.id == protoArrow.destID) {
+            option.setAttribute("selected", "selected");
+        }
+        select.appendChild(option);
+    }
+    td2 = simpleCreateElement("TD");
+    td2.appendChild(select);
+    btn1 = simpleCreateElement("BUTTON", "Change");
+    btn1.onclick = handleChangeArrowDestButton;
     td3 = simpleCreateElement("TD");
-    td3.appendChild(btn);
+    td3.appendChild(btn1);
+    btn2 = simpleCreateElement("BUTTON", "Go");
+    btn2.onclick = function () { updateCS("state", protoArrow.destID) };
+    td4 = simpleCreateElement("TD");
+    td4.appendChild(btn2);
     tr2 = simpleCreateElement("TR");
-    appendMultipleChildren(tr2, [td1, td2, td3]);
+    appendMultipleChildren(tr2, [td1, td2, td3, td4]);
 
     tbl = makeTable(null, [tr1, tr2]);
 
-    let label = simpleCreateElement("LABEL", "Letter: ");
-    let select = simpleCreateElement("SELECT");
+    label = simpleCreateElement("LABEL", "Letter: ");
+    select = simpleCreateElement("SELECT");
     select.id = "arrowControlLetterInp";
-    let option, letter;
+    let letter;
     for (const letterID of protoLetterList) {
         letter = protoLetterMap.get(letterID);
         option = simpleCreateElement("OPTION", letter.name);
@@ -200,8 +232,8 @@ function populateArrowControl (protoArrow) {
     let nextBtn = simpleCreateElement("BUTTON", "Next");
     nextBtn.onclick = function () { cycleDisplay(1) };
 
-    appendMultipleChildren(controlDiv, [p1, tbl, label, select, renameBtn, makeBR(),
-        delBtn, makeBR(), prevBtn, nextBtn]);
+    appendMultipleChildren(controlDiv, [p1, prevBtn, nextBtn, tbl, label, select, renameBtn, makeBR(),
+        delBtn, makeBR()]);
 }
 
 function populateLetterControl (letter) {
@@ -219,7 +251,7 @@ function populateLetterControl (letter) {
     nextBtn.onclick = function () { cycleDisplay(1) };
 
     appendMultipleChildren(controlDiv, [
-        p, inp, renameButton, makeBR(), prevBtn, nextBtn
+        p, prevBtn, nextBtn, makeBR(), inp, renameButton, makeBR()
     ]);
 }
 

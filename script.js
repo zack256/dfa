@@ -124,6 +124,7 @@ function clearStates () {
     protoLetterNames.clear();
     CS = [null, -1];
     addLetter("a"); // tbd.
+    updateCS(null, -1);
 }
 
 function getStateFromPos(pos) {
@@ -311,6 +312,44 @@ function handleChangeTransitionButton () {
         currentArrow.letterID = protoLetterNames.get(newLetter);
         arrowList.children[currentArrow.idx].children[2].innerHTML = protoLetterMap.get(currentArrow.letterID).name;
     }
+}
+
+function handleChangeArrowOriginButton () {
+    let originInp = document.getElementById("arrowControlOriginInput");
+    let newOriginName = originInp.value;
+    let currentArrow = GSA();
+    let oldOrigin = protoStateMap.get(currentArrow.originID);
+    let newOrigin = protoStateMap.get(protoStateNames.get(newOriginName));
+    if (newOrigin.outgoing.has(currentArrow.destID) && newOrigin.outgoing.get(currentArrow.destID) != currentArrow.id) {
+        alert("Arrow with these vertices already exists!");
+        return;
+    }
+    let dest = protoStateMap.get(currentArrow.destID);
+    dest.incoming.delete(currentArrow.originID);
+    dest.incoming.set(newOrigin.id, currentArrow.id);
+    oldOrigin.outgoing.delete(currentArrow.destID);
+    currentArrow.originID = newOrigin.id;
+    newOrigin.outgoing.set(currentArrow.destID, currentArrow.id);
+    arrowList.children[currentArrow.idx].children[0].innerHTML = newOriginName;
+}
+
+function handleChangeArrowDestButton () {
+    let destInp = document.getElementById("arrowControlDestInput");
+    let newDestName = destInp.value;
+    let currentArrow = GSA();
+    let oldDest = protoStateMap.get(currentArrow.destID);
+    let newDest = protoStateMap.get(protoStateNames.get(newDestName));
+    if (newDest.incoming.has(currentArrow.originID) && newDest.incoming.get(currentArrow.originID) != currentArrow.id) {
+        alert("Arrow with these vertices already exists!");
+        return;
+    }
+    let origin = protoStateMap.get(currentArrow.originID);
+    origin.outgoing.delete(currentArrow.destID);
+    origin.outgoing.set(newDest.id, currentArrow.id);
+    oldDest.incoming.delete(currentArrow.originID);
+    currentArrow.destID = newDest.id;
+    newDest.incoming.set(currentArrow.originID, currentArrow.id);
+    arrowList.children[currentArrow.idx].children[1].innerHTML = newDestName;
 }
 
 function handleDeleteTransitionButton () {
