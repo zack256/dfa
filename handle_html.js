@@ -279,3 +279,27 @@ function addLetterTR (letter) {
     appendMultipleChildren(tr, [td1, td2]);
     tbody.append(tr);
 }
+
+function addStartStateOption (protoState) {
+    let select = document.getElementById("startStateSelect");
+    let option = simpleCreateElement("OPTION", protoState.name);
+    option.value = protoState.id;
+    option.id = "selectStateOption" + protoState.id;
+    select.appendChild(option);
+}
+function editStartStateOption (protoState) {
+    let option = document.getElementById("selectStateOption" + protoState.id);
+    option.innerHTML = protoState.name;
+}
+function deleteStartStateOption (protoState) {
+    let option = document.getElementById("selectStateOption" + protoState.id);
+    option.remove();
+}
+function clearStartStateSelect () {
+    let select = document.getElementById("startStateSelect");
+    select.replaceChildren();
+    let option = simpleCreateElement("OPTION", "(Unset)");
+    option.value = "0";
+    option.id = "selectStateOption0";
+    select.appendChild(option);
+}

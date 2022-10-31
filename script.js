@@ -20,17 +20,20 @@ const letterList = document.getElementById("alphabetTBody");
 const controlDiv = document.getElementById("controlDiv");
 
 let dfa = null;
+let CS = [null, -1];
+
+let nextProtoStateID, nextProtoArrowID, nextProtoLetterID, arrowOrigin;
+
 let protoStateList = [];
 let protoStateNames = new StrictMap();    // for now
 let protoStateMap = new StrictMap();
-let nextProtoStateID = 1;
 
 let protoArrowList = [];
 let protoArrowMap = new StrictMap();
-let nextProtoArrowID = 1;
 
-let protoLetterMap, protoLetterNames, protoLetterList, nextProtoLetterID;
-let CS, arrowOrigin;        // CS = currentlySelected, a list [what, ID]
+let protoLetterList = [];
+let protoLetterNames = new StrictMap();
+let protoLetterMap = new StrictMap();
 
 let mousePos = new Pos(null, null);
 
@@ -91,6 +94,7 @@ function makeProtoState (pos) {
     protoStateNames.set(protoState.name, protoState.id);
     protoStateMap.set(nextProtoStateID, protoState);
     createStateTR(protoState.name);
+    addStartStateOption(protoState);
     nextProtoStateID++;
     return true;
 }
@@ -102,29 +106,6 @@ function newStateWillIntersectExisting (newProtoState) {
         }
     }
     return false;
-}
-
-function clearStates () {
-    // errm, why do we have this?
-    stateList.replaceChildren();
-    controlDiv.replaceChildren();
-    arrowList.replaceChildren();
-    letterList.replaceChildren();
-    protoStateList = [];
-    protoStateNames.clear();
-    protoStateMap.clear();
-    protoArrowList = [];
-    protoArrowMap.clear();
-    currentlySelected = [null, -1];
-    nextProtoStateID = 1;   // Can rm if wanted.
-    nextProtoArrowID = 1;   // ""
-    nextProtoLetterID = 1;
-    protoLetterMap.clear();
-    protoLetterList = [];
-    protoLetterNames.clear();
-    CS = [null, -1];
-    addLetter("a"); // tbd.
-    updateCS(null, -1);
 }
 
 function getStateFromPos(pos) {
@@ -150,23 +131,23 @@ function controlChangeStateName () {
     if (protoStateNames.has(newName)) {
         alert("A state already has the name \"" + newName + "\"!");
         return;
-    } else {
-        protoStateNames.delete(oldName);
-        protoStateNames.set(newName, CS[1]);
-        ps.name = newName;
-        stateList.children[ps.idx].children[0].innerHTML = newName;
-        // Updates state names in arrow table if needed
-        let pa;
-        for (var i = 0; i < protoArrowList.length; i++) {
-            pa = protoArrowMap.get(protoArrowList[i]);
-            if (pa.originID == ps.id) {
-                arrowList.children[pa.idx].children[0].innerHTML = ps.name;
-            }
-            if (pa.destID == ps.id) {
-                arrowList.children[pa.idx].children[1].innerHTML = ps.name;
-            }
+    }
+    protoStateNames.delete(oldName);
+    protoStateNames.set(newName, CS[1]);
+    ps.name = newName;
+    stateList.children[ps.idx].children[0].innerHTML = newName;
+    // Updates state names in arrow table if needed
+    let pa;
+    for (var i = 0; i < protoArrowList.length; i++) {
+        pa = protoArrowMap.get(protoArrowList[i]);
+        if (pa.originID == ps.id) {
+            arrowList.children[pa.idx].children[0].innerHTML = ps.name;
+        }
+        if (pa.destID == ps.id) {
+            arrowList.children[pa.idx].children[1].innerHTML = ps.name;
         }
     }
+    editStartStateOption(ps);
 }
 
 function setSelectedStateAsAccepting (inp) {
@@ -211,6 +192,10 @@ function updateCS (newWhat, newID) {
     }
 }
 
+function resetCS () {
+    updateCS(null, -1);
+}
+
 function cycleDisplay (direction) {
     // Probably telling us to abstract more
     let idx, newIdx, newID;
@@ -251,6 +236,7 @@ function deleteSelectedState () {
     pop(protoStateList, protoState.idx);
     protoStateNames.delete(protoState.name);
     stateList.children[protoState.idx].remove();
+    deleteStartStateOption(protoState);
     protoStateMap.delete(protoState.id);
 }
 
@@ -292,14 +278,12 @@ function handleAddLetter () {
     }
     addLetter(letterName);
     inp.value = "";
-    //if (selectedArrowID != -1) {
     if (CS[0] == "arrow") {
         populateArrowControl(GSA());
     }
 }
 
 function handleArrowEditButton (arrowID) {
-   //updateCurrentlySelectedArrow(arrowID);
    updateCS("arrow", arrowID);
 }
 
@@ -407,14 +391,12 @@ function handleMouseUp (e) {
         } else {
             let res = makeProtoState(pos);
             if (res) {
-                //updateCurrentlySelectedState(nextProtoStateID - 1);
                 updateCS("state", nextProtoStateID - 1);    // bad
             }
         }
     } else {
         if (arrowOrigin == IDOfstateClicked) arrowOrigin = -1; // keep :)
         if (arrowOrigin == -1) {
-            //updateCurrentlySelectedState(IDOfstateClicked);
             updateCS("state", IDOfstateClicked);
         } else {
             makeArrow(arrowOrigin, IDOfstateClicked);
@@ -431,18 +413,37 @@ function handleMouseDown (e) {
     }
 }
 
-function goodReset () {
-    protoLetterList = [];   // aka protoAlphabet?
-    protoLetterNames = new StrictMap();
-    protoLetterMap = new StrictMap();
-    nextProtoLetterID = 1;
-    CS = [null, -1];
-    arrowOrigin = -1;
-}
+function resetProgram (initializeALetter=true) {
 
-function initProtoStage () {
-    goodReset();
-    addLetter("a"); // demo
+    resetCS();
+
+    stateList.replaceChildren();
+    controlDiv.replaceChildren();
+    arrowList.replaceChildren();
+    letterList.replaceChildren();
+    clearStartStateSelect();
+
+    protoStateList = [];
+    protoStateNames.clear();
+    protoStateMap.clear();
+
+    protoArrowList = [];
+    protoArrowMap.clear();
+
+    protoLetterMap.clear();
+    protoLetterList = [];
+    protoLetterNames.clear();
+
+    nextProtoStateID = 1;   // Can rm if wanted.
+    nextProtoArrowID = 1;   // ""
+    nextProtoLetterID = 1;
+
+    arrowOrigin = -1;
+
+    if (initializeALetter) {
+        addLetter("a");
+        resetCS();
+    }
 }
 
 function handleMouseMove (e) {
@@ -470,4 +471,4 @@ window.addEventListener("load", function (e) {
 
 });
 
-initProtoStage();
+resetProgram();

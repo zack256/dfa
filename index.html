@@ -12,7 +12,7 @@
             </canvas>
         </div>
         <div id="buttonsDiv">
-            <button onclick = "clearStates();">Clear</button>
+            <button onclick = "resetProgram();">Clear</button>
             <button onclick = "console.log('helo');">Check</button>
         </div>
         <div id="leftDiv">
@@ -20,6 +20,7 @@
                 <button onclick="changePanel('states');">States</button>
                 <button onclick="changePanel('alphabet');">Alphabet</button>
                 <button onclick="changePanel('delta');">Delta</button>
+                <button onclick="changePanel('startState');">Start State</button>
             </div>
             <hr>
             <div id="statesPanel" class="panelDiv activePanel">
@@ -62,11 +63,16 @@
                 <button onclick="handleAddLetter();">Add Letter</button>
             </div>
             <div id="deltaPanel" class="panelDiv">
-                <p>Delta Panel</p>
+                <p>Delta</p>
                 <table>
                     <tbody id="deltaTBody">
                     </tbody>
                 </table>
+            </div>
+            <div id="startStatePanel" class="panelDiv">
+                <p>Start state</p>
+                <select id="startStateSelect">
+                </select>
             </div>
         </div>
 
@@ -80,6 +86,7 @@
         <script src="proto_arrow.js"></script>
         <script src="strict_map.js"></script>
         <script src="dfa.js"></script>
+        <script src="check_dfa.js"></script>
         <script src="art.js"></script>
         <script src="handle_html.js"></script>
         <script src="script.js"></script>

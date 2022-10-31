@@ -51,6 +51,16 @@ function drawArrow (startPos, endPos) {
     }
 }
 
+function drawDiamondInCircle (centerPos, radius) {
+    ctx.beginPath();
+    ctx.moveTo(centerPos.x, centerPos.y - radius);
+    ctx.lineTo(centerPos.x + radius, centerPos.y);
+    ctx.lineTo(centerPos.x, centerPos.y + radius);
+    ctx.lineTo(centerPos.x - radius, centerPos.y);
+    ctx.lineTo(centerPos.x, centerPos.y - radius);
+    ctx.stroke();
+}
+
 function getRandomStateCoords () {
     // Prevents bleeding off edge of canvas.
     let width = canvas.width;
@@ -62,6 +72,7 @@ function getRandomStateCoords () {
 
 function drawProtoStates () {
     var id, protoState;
+    let currentStartState = document.getElementById("startStateSelect").value;
     for (var i = 0; i < protoStateList.length; i++) {
         id = protoStateList[i];
         protoState = protoStateMap.get(id);
@@ -74,6 +85,9 @@ function drawProtoStates () {
 
         if (protoState.isAccepting) {
             drawCircle(protoState.pos.x, protoState.pos.y, protoState.radius * goodInnerRadiusFrac);
+        }
+        if (protoState.id == currentStartState) {
+            drawDiamondInCircle(protoState.pos, protoState.radius);
         }
     
         ctx.fillText(protoState.name, protoState.pos.x, protoState.pos.y);
