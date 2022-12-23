@@ -303,3 +303,80 @@ function clearStartStateSelect () {
     option.id = "selectStateOption0";
     select.appendChild(option);
 }
+
+function resetDeltaTH () {
+    let tr = simpleCreateElement("TR");
+    let th = simpleCreateElement("TH", "###");
+    tr.appendChild(th);
+    deltaTHead.appendChild(tr);
+}
+
+function deltaTblAddRow (state) {
+    let tr = simpleCreateElement("TR"), td;
+    let nameTD = simpleCreateElement("TD");
+    let btn = simpleCreateElement("BUTTON", state.name);
+    btn.onclick = function () {
+        updateCS("state", state.id);
+    };
+    nameTD.appendChild(btn);
+    tr.appendChild(nameTD);
+    for (var i = 0; i < protoLetterList.length; i++) {
+        td = simpleCreateElement("TD");
+        tr.appendChild(td);
+    }
+    deltaTBody.appendChild(tr);
+}
+
+function deltaTblEditRow (state) {
+    // Rename.
+    deltaTBody.children[state.idx].children[0].children[0].innerHTML = state.name;
+}
+
+function deltaTblDeleteRow (state) {
+    deltaTBody.children[state.idx].remove();
+}
+
+function deltaTblAddCol (letter) {
+    let btn = simpleCreateElement("BUTTON", letter.name);
+    btn.onclick = function () {
+        updateCS("letter", letter.id);
+    };
+    let th = simpleCreateElement("TH"), td;
+    th.appendChild(btn);
+    deltaTHead.children[0].appendChild(th);
+    for (var i = 0; i < deltaTBody.children.length; i++) {
+        td = simpleCreateElement("TD");
+        deltaTBody.children[i].appendChild(td);
+    }
+}
+
+function deltaTblEditCol (letter) {
+    // Rename.
+    deltaTHead.children[0].children[letter.idx + 1].children[0].innerHTML = letter.name;
+}
+
+/**
+function deltaTblDeleteCol (letter) {
+    deltaTHead.children[0].children[letter.idx].remove();
+    for (var i = 0; i < deltaTBody.children.length; i++) {
+        deltaTBody.children[i].children[letter.idx].remove();
+    }
+}
+*/
+
+function deltaTblAddCell (arrow) {
+    let btn = simpleCreateElement("BUTTON", protoStateMap.get(arrow.destID).name);
+    btn.onclick = function () {
+        updateCS("arrow", arrow.id);
+    };
+    deltaTBody.children[protoStateMap.get(arrow.originID).idx].children[protoLetterMap.get(arrow.letterID).idx + 1].appendChild(btn);
+}
+
+function deltaTblDeleteCell (arrow) {
+    deltaTBody.children[protoStateMap.get(arrow.originID).idx].children[protoLetterMap.get(arrow.letterID).idx + 1].children[0].remove();
+}
+
+function deltaTblRefreshCell (arrow) {
+    deltaTblDeleteCell(arrow);
+    deltaTblAddCell(arrow);
+}
