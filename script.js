@@ -148,7 +148,7 @@ function controlChangeStateName () {
         }
         if (pa.destID == ps.id) {
             arrowList.children[pa.idx].children[1].innerHTML = ps.name;
-            deltaTblRefreshCell(pa);
+            deltaTblUpdateCell(pa.originID, pa.letterID);
         }
     }
     deltaTblEditRow(ps);
@@ -228,7 +228,6 @@ function deleteSelectedState () {
     while (z < protoArrowList.length) {
         protoArrow = protoArrowMap.get(protoArrowList[z]);
         if (protoArrow.originID == protoState.id || protoArrow.destID == protoState.id) {
-            deltaTblDeleteCell(protoArrow);
             pop(protoArrowList, z);
             arrowList.children[z].remove();
         } else {
@@ -257,7 +256,7 @@ function makeArrow (fromID, toID) {
         protoArrowMap.set(newProtoArrow.id, newProtoArrow);
         protoArrowList.push(newProtoArrow.id);
         createArrowTR(newProtoArrow);
-        deltaTblAddCell(newProtoArrow);
+        deltaTblUpdateCell(fromID, newProtoArrow.letterID);
         updateCS("arrow", newProtoArrow.id);
     }
 }
@@ -302,10 +301,12 @@ function handleChangeTransitionButton () {
     let newLetter = inp.value;
     if (protoLetterNames.has(newLetter)) {
         let currentArrow = GSA();
-        deltaTblDeleteCell(currentArrow);
+        let prevOID = currentArrow.originID;
+        let prevLID = currentArrow.letterID;
         currentArrow.letterID = protoLetterNames.get(newLetter);
         arrowList.children[currentArrow.idx].children[2].innerHTML = protoLetterMap.get(currentArrow.letterID).name;
-        deltaTblAddCell(currentArrow);
+        deltaTblUpdateCell(prevOID, prevLID);
+        deltaTblUpdateCell(currentArrow.originID, currentArrow.letterID);
     }
 }
 
@@ -313,7 +314,8 @@ function handleChangeArrowOriginButton () {
     let originInp = document.getElementById("arrowControlOriginInput");
     let newOriginName = originInp.value;
     let currentArrow = GSA();
-    deltaTblDeleteCell(currentArrow);
+    let prevOID = currentArrow.originID;
+    let prevLID = currentArrow.letterID;
     let oldOrigin = protoStateMap.get(currentArrow.originID);
     let newOrigin = protoStateMap.get(protoStateNames.get(newOriginName));
     if (newOrigin.outgoing.has(currentArrow.destID) && newOrigin.outgoing.get(currentArrow.destID) != currentArrow.id) {
@@ -327,14 +329,14 @@ function handleChangeArrowOriginButton () {
     currentArrow.originID = newOrigin.id;
     newOrigin.outgoing.set(currentArrow.destID, currentArrow.id);
     arrowList.children[currentArrow.idx].children[0].innerHTML = newOriginName;
-    deltaTblAddCell(currentArrow);
+    deltaTblUpdateCell(prevOID, prevLID);
+    deltaTblUpdateCell(currentArrow.originID, currentArrow.letterID);
 }
 
 function handleChangeArrowDestButton () {
     let destInp = document.getElementById("arrowControlDestInput");
     let newDestName = destInp.value;
     let currentArrow = GSA();
-    deltaTblDeleteCell(currentArrow);
     let oldDest = protoStateMap.get(currentArrow.destID);
     let newDest = protoStateMap.get(protoStateNames.get(newDestName));
     if (newDest.incoming.has(currentArrow.originID) && newDest.incoming.get(currentArrow.originID) != currentArrow.id) {
@@ -348,12 +350,11 @@ function handleChangeArrowDestButton () {
     currentArrow.destID = newDest.id;
     newDest.incoming.set(currentArrow.originID, currentArrow.id);
     arrowList.children[currentArrow.idx].children[1].innerHTML = newDestName;
-    deltaTblAddCell(currentArrow);
+    deltaTblUpdateCell(currentArrow.originID, currentArrow.letterID);
 }
 
 function handleDeleteTransitionButton () {
     let arrow = GSA();
-    deltaTblDeleteCell(arrow);
     updateCS(null, -1);
 
     for (var i = arrow.idx + 1; i < protoArrowList.length; i++) {
@@ -366,6 +367,8 @@ function handleDeleteTransitionButton () {
     protoStateMap.get(arrow.destID).incoming.delete(arrow.originID);
 
     protoArrowMap.delete(arrow.id);
+
+    deltaTblUpdateCell(currentArrow.originID, currentArrow.letterID);
 }
 
 function handleEditLetterButton (letterID) {

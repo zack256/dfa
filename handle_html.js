@@ -364,6 +364,26 @@ function deltaTblDeleteCol (letter) {
 }
 */
 
+function deltaTblUpdateCell (originStateID, letterID) {
+    let originState = protoStateMap.get(originStateID);
+    let letter = protoLetterMap.get(letterID);
+    deltaTBody.children[originState.idx].children[letter.idx + 1].replaceChildren();
+
+    for (const [stateID, arrowID] of originState.outgoing.entries()) {
+        let arrow = protoArrowMap.get(arrowID);
+        if (arrow.letterID != letterID) {
+            continue;
+        }
+        let destState = protoStateMap.get(stateID);
+        let btn = simpleCreateElement("BUTTON", destState.name);
+        btn.onclick = function () {
+            updateCS("arrow", arrow.id);
+        };
+        deltaTBody.children[originState.idx].children[letter.idx + 1].appendChild(btn);
+    }
+
+}
+/**
 function deltaTblAddCell (arrow) {
     let btn = simpleCreateElement("BUTTON", protoStateMap.get(arrow.destID).name);
     btn.onclick = function () {
@@ -380,3 +400,4 @@ function deltaTblRefreshCell (arrow) {
     deltaTblDeleteCell(arrow);
     deltaTblAddCell(arrow);
 }
+**/
