@@ -148,7 +148,8 @@ function controlChangeStateName () {
         }
         if (pa.destID == ps.id) {
             arrowList.children[pa.idx].children[1].innerHTML = ps.name;
-            deltaTblUpdateCell(pa.originID, pa.letterID);
+            //deltaTblUpdateCell(pa.originID, pa.letterID);
+            deltaTblUpdateAllRowsCells();
         }
     }
     deltaTblEditRow(ps);
@@ -257,14 +258,14 @@ function deleteSelectedState () {
 function makeArrow (fromID, toID) {
     if (!protoStateMap.get(fromID).outgoing.has(toID)) {
 
-        let newProtoArrow = new ProtoArrow(nextProtoArrowID, protoArrowList.length, 1, fromID, toID);
+        let newProtoArrow = new ProtoArrow(nextProtoArrowID, protoArrowList.length, new Set([1]), protoLetterMap.get(1).name, fromID, toID);
         nextProtoArrowID++;
         protoStateMap.get(fromID).outgoing.set(toID, newProtoArrow.id);
         protoStateMap.get(toID).incoming.set(fromID, newProtoArrow.id);
         protoArrowMap.set(newProtoArrow.id, newProtoArrow);
         protoArrowList.push(newProtoArrow.id);
         createArrowTR(newProtoArrow);
-        deltaTblUpdateCell(fromID, newProtoArrow.letterID);
+        deltaTblUpdateRowCells(fromID);
         updateCS("arrow", newProtoArrow.id);
     }
 }
@@ -302,7 +303,7 @@ function handleAddLetter () {
 function handleArrowEditButton (arrowID) {
    updateCS("arrow", arrowID);
 }
-
+/**
 function handleChangeTransitionButton () {
     // Handles when "change" button pressed on arrow's transition.
     let inp = document.getElementById("arrowControlLetterInp");
@@ -316,6 +317,26 @@ function handleChangeTransitionButton () {
         deltaTblUpdateCell(prevOID, prevLID);
         deltaTblUpdateCell(currentArrow.originID, currentArrow.letterID);
     }
+}
+**/
+
+function handleUpdateTransitionsButton () {
+    // Handles when "update" button pressed on arrow's transition.
+    let currentArrow = GSA();
+    let checkboxes = document.getElementsByClassName("arrowLetterCBox");
+    let newLetters = new Set();
+    let lettersArray = [];
+    for (const checkbox of checkboxes) {
+        if (checkbox.checked) {
+            let letter = protoLetterMap.get(Number(checkbox.value));
+            newLetters.add(letter.id);
+            lettersArray.push(letter.name);
+        }
+    }
+    currentArrow.letterIDs = newLetters;
+    currentArrow.displayString = lettersArray.join(", ");
+    arrowList.children[currentArrow.idx].children[2].innerHTML = currentArrow.displayString;
+    deltaTblUpdateRowCells(currentArrow.originID);
 }
 
 function handleChangeArrowOriginButton () {
@@ -337,8 +358,8 @@ function handleChangeArrowOriginButton () {
     currentArrow.originID = newOrigin.id;
     newOrigin.outgoing.set(currentArrow.destID, currentArrow.id);
     arrowList.children[currentArrow.idx].children[0].innerHTML = newOriginName;
-    deltaTblUpdateCell(prevOID, prevLID);
-    deltaTblUpdateCell(currentArrow.originID, currentArrow.letterID);
+    deltaTblUpdateRowCells(prevOID);
+    deltaTblUpdateRowCells(currentArrow.originID);
 }
 
 function handleChangeArrowDestButton () {
@@ -358,7 +379,7 @@ function handleChangeArrowDestButton () {
     currentArrow.destID = newDest.id;
     newDest.incoming.set(currentArrow.originID, currentArrow.id);
     arrowList.children[currentArrow.idx].children[1].innerHTML = newDestName;
-    deltaTblUpdateCell(currentArrow.originID, currentArrow.letterID);
+    deltaTblUpdateRowCells(currentArrow.originID);
 }
 
 function handleDeleteTransitionButton () {
@@ -374,7 +395,8 @@ function handleDeleteTransitionButton () {
     protoStateMap.get(arrow.originID).outgoing.delete(arrow.destID);
     protoStateMap.get(arrow.destID).incoming.delete(arrow.originID);
 
-    deltaTblUpdateCell(arrow.originID, arrow.letterID);
+    //deltaTblUpdateCell(arrow.originID, arrow.letterID);
+    deltaTblUpdateRowCells(arrow.originID);
 
     protoArrowMap.delete(arrow.id);
 }

@@ -56,7 +56,8 @@ function createStateTR (name) {
 function createArrowTR (protoArrow) {
     let td1 = simpleCreateElement("TD", protoStateMap.get(protoArrow.originID).name);
     let td2 = simpleCreateElement("TD", protoStateMap.get(protoArrow.destID).name);
-    let td3 = simpleCreateElement("TD", protoLetterMap.get(protoArrow.letterID).name);
+    //let td3 = simpleCreateElement("TD", protoLetterMap.get(protoArrow.letterID).name);
+    let td3 = simpleCreateElement("TD", protoArrow.displayString);
     let btn = simpleCreateElement("BUTTON", "Edit");
     let id = protoArrow.id;
     btn.onclick = function () {
@@ -93,7 +94,7 @@ function populateStateControl (protoState) {
     let TTHeader = simpleCreateElement("TR");
     appendMultipleChildren(TTHeader, [
         simpleCreateElement("TH", "To"),
-        simpleCreateElement("TH", "Letter"),
+        simpleCreateElement("TH", "Letters"),
         simpleCreateElement("TH", "Edit")
     ]);
     
@@ -106,7 +107,8 @@ function populateStateControl (protoState) {
         btn.onclick = function () { handleArrowEditButton(arrowID); }
         appendMultipleChildren(tr, [
             simpleCreateElement("TD", state.name),
-            simpleCreateElement("TD", protoLetterMap.get(arrow.letterID).name),
+            //simpleCreateElement("TD", protoLetterMap.get(arrow.letterID).name),
+            simpleCreateElement("TD", arrow.displayString),
             btn
         ]);
         TTRows.push(tr);
@@ -117,7 +119,7 @@ function populateStateControl (protoState) {
     TTHeader = simpleCreateElement("TR");
     appendMultipleChildren(TTHeader, [
         simpleCreateElement("TH", "From"),
-        simpleCreateElement("TH", "Letter"),
+        simpleCreateElement("TH", "Letters"),
         simpleCreateElement("TH", "Edit")
     ]);
 
@@ -130,7 +132,8 @@ function populateStateControl (protoState) {
         btn.onclick = function () { handleArrowEditButton(arrowID); }
         appendMultipleChildren(tr, [
             simpleCreateElement("TD", state.name),
-            simpleCreateElement("TD", protoLetterMap.get(arrow.letterID).name),
+            //simpleCreateElement("TD", protoLetterMap.get(arrow.letterID).name),
+            simpleCreateElement("TD", arrow.displayString),
             btn
         ]);
         TTRows.push(tr);
@@ -155,7 +158,12 @@ function populateStateControl (protoState) {
 function populateArrowControl (protoArrow) {
     clearControl();
     let p1 = simpleCreateElement("P", "Editing transition.");
-    let td1, td2, td3, td4, btn1, btn2, tr1, tr2, tbl, label, select, option;
+    let td1, td2, td3, td4, btn1, btn2, tr1, tr2, tbl1, tbl2, label, select, option;
+
+    let prevBtn = simpleCreateElement("BUTTON", "Previous");
+    prevBtn.onclick = function () { cycleDisplay(-1) };
+    let nextBtn = simpleCreateElement("BUTTON", "Next");
+    nextBtn.onclick = function () { cycleDisplay(1) };
 
     td1 = simpleCreateElement("TD", "From:");
     //td2 = simpleCreateElement("TD", protoStateMap.get(protoArrow.originID).name);
@@ -207,33 +215,51 @@ function populateArrowControl (protoArrow) {
     tr2 = simpleCreateElement("TR");
     appendMultipleChildren(tr2, [td1, td2, td3, td4]);
 
-    tbl = makeTable(null, [tr1, tr2]);
+    tbl1 = makeTable(null, [tr1, tr2]);
 
-    label = simpleCreateElement("LABEL", "Letter: ");
+    /** 
+    label = simpleCreateElement("LABEL", "Add Letters: ");
     select = simpleCreateElement("SELECT");
     select.id = "arrowControlLetterInp";
     let letter;
     for (const letterID of protoLetterList) {
         letter = protoLetterMap.get(letterID);
         option = simpleCreateElement("OPTION", letter.name);
-        if (protoArrow.letterID == letterID) {
-            option.setAttribute("selected", "selected");
-        }
+        //if (protoArrow.letterID == letterID) {
+        //    option.setAttribute("selected", "selected");
+        //}
         select.appendChild(option);
     }
-    let renameBtn = simpleCreateElement("BUTTON", "Change");
+    let renameBtn = simpleCreateElement("BUTTON", "Add");
     renameBtn.onclick = handleChangeTransitionButton;
+    **/
     //let p4 = simpleCreateElement("P", "Letter: " + protoLetterMap.get(protoArrow.letterID).name);
     let delBtn = simpleCreateElement("BUTTON", "Delete");
     delBtn.onclick = handleDeleteTransitionButton;
 
-    let prevBtn = simpleCreateElement("BUTTON", "Previous");
-    prevBtn.onclick = function () { cycleDisplay(-1) };
-    let nextBtn = simpleCreateElement("BUTTON", "Next");
-    nextBtn.onclick = function () { cycleDisplay(1) };
+    appendMultipleChildren(controlDiv, [p1, prevBtn, nextBtn, tbl1, makeBR(), delBtn]);
 
-    appendMultipleChildren(controlDiv, [p1, prevBtn, nextBtn, tbl, label, select, renameBtn, makeBR(),
-        delBtn, makeBR()]);
+    let updateBtn = simpleCreateElement("BUTTON", "Update Letters");
+    updateBtn.onclick = handleUpdateTransitionsButton;
+
+    let fieldset = simpleCreateElement("FIELDSET");
+    let legend = simpleCreateElement("LEGEND", "Letters");
+    fieldset.appendChild(legend);
+    for (const letterID of protoLetterList) {
+        letter = protoLetterMap.get(letterID);
+        let inp = simpleCreateElement("INPUT");
+        inp.setAttribute("type", "checkbox");
+        inp.setAttribute("value", letter.id);
+        //inp.setAttribute("checked", protoArrow.letterIDs.has(letter.id));
+        inp.checked = protoArrow.letterIDs.has(letter.id);
+        inp.classList.add("arrowLetterCBox");
+        let label = simpleCreateElement("LABEL", letter.name);
+        appendMultipleChildren(fieldset, [inp, label, makeBR()]);
+    }
+
+    //appendMultipleChildren(controlDiv, [p1, prevBtn, nextBtn, tbl1, label,/**select,renameBtn,**/ makeBR(),
+    //    delBtn, makeBR(), fieldset]);
+    appendMultipleChildren(controlDiv, [makeBR(), updateBtn, fieldset]);
 }
 
 function populateLetterControl (letter) {
@@ -364,6 +390,7 @@ function deltaTblDeleteCol (letter) {
 }
 */
 
+/**
 function deltaTblUpdateCell (originStateID, letterID) {
     let originState = protoStateMap.get(originStateID);
     let letter = protoLetterMap.get(letterID);
@@ -381,7 +408,32 @@ function deltaTblUpdateCell (originStateID, letterID) {
         };
         deltaTBody.children[originState.idx].children[letter.idx + 1].appendChild(btn);
     }
+}
+**/
 
+function deltaTblUpdateRowCells (originStateID) {
+    let originState = protoStateMap.get(originStateID);
+    for (var i = 0; i < protoLetterList.length; i++) {
+        deltaTBody.children[originState.idx].children[i + 1].replaceChildren();
+    }
+    for (const [stateID, arrowID] of originState.outgoing.entries()) {
+        let arrow = protoArrowMap.get(arrowID);
+        for (const letterID of arrow.letterIDs) {
+            let letter = protoLetterMap.get(letterID);
+            let destState = protoStateMap.get(stateID);
+            let btn = simpleCreateElement("BUTTON", destState.name);
+            btn.onclick = function () {
+                updateCS("arrow", arrow.id);
+            };
+            deltaTBody.children[originState.idx].children[letter.idx + 1].appendChild(btn);
+        }
+    }
+}
+
+function deltaTblUpdateAllRowsCells () {
+    for (var i = 0; i < protoStateList.length; i++) {
+        deltaTblUpdateRowCells(protoStateList[i]);
+    }
 }
 
 function getStartingStateValue () {

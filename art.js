@@ -114,8 +114,10 @@ function drawProtoArrows () {
         drawArrow(protoState1.pos, new Pos(protoState1.pos.x + vec.x, protoState1.pos.y + vec.y));
         //midPointPos = new Pos(protoState1.pos.x + vec.x / 2, protoState1.pos.y + vec.y / 2);
         midPointPos = new Pos((protoState1.pos.x + protoState2.pos.x) / 2, (protoState1.pos.y + protoState2.pos.y) / 2);
-        if (protoArrow.letterID != -1) {
-            ctx.fillText(protoLetterMap.get(protoArrow.letterID).name, midPointPos.x, midPointPos.y);
+        //if (protoArrow.letterID != -1) {
+        if (protoArrow.letterIDs.size != 0) {
+            //ctx.fillText(protoLetterMap.get(protoArrow.letterID).name, midPointPos.x, midPointPos.y);
+            ctx.fillText(protoArrow.displayString, midPointPos.x, midPointPos.y);
         }
         if (isHighlighting) {
             ctx.strokeStyle = "black";

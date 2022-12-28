@@ -1,8 +1,9 @@
 class ProtoArrow {
-    constructor (id, idx, letterID, originID, destID) {
+    constructor (id, idx, letterIDs, displayString, originID, destID) {
         this.id = id;
         this.idx = idx;
-        this.letterID = letterID;
+        this.letterIDs = letterIDs;
+        this.displayString = displayString;
         this.originID = originID;
         this.destID = destID;
     }
