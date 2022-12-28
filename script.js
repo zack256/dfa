@@ -224,12 +224,20 @@ function deleteSelectedState () {
     // Assumes a state is selected!
     let protoState = GSS();
     updateCS(null, -1);
-    let z = 0, protoArrow;
+    let z = 0, protoArrow, isOrigin, isDest;
     while (z < protoArrowList.length) {
         protoArrow = protoArrowMap.get(protoArrowList[z]);
-        if (protoArrow.originID == protoState.id || protoArrow.destID == protoState.id) {
+        isOrigin = protoArrow.originID == protoState.id;
+        isDest  = protoArrow.destID == protoState.id;
+        if (isOrigin || isDest) {
             pop(protoArrowList, z);
             arrowList.children[z].remove();
+            if (isOrigin) {
+                protoStateMap.get(protoArrow.destID).incoming.delete(protoState.id);
+            } else if (isDest) {
+                protoStateMap.get(protoArrow.originID).outgoing.delete(protoState.id);
+            }
+            protoArrowMap.delete(protoArrow);
         } else {
             protoArrowMap.get(protoArrowList[z]).idx = z;
             z++;
@@ -366,9 +374,9 @@ function handleDeleteTransitionButton () {
     protoStateMap.get(arrow.originID).outgoing.delete(arrow.destID);
     protoStateMap.get(arrow.destID).incoming.delete(arrow.originID);
 
-    protoArrowMap.delete(arrow.id);
+    deltaTblUpdateCell(arrow.originID, arrow.letterID);
 
-    deltaTblUpdateCell(currentArrow.originID, currentArrow.letterID);
+    protoArrowMap.delete(arrow.id);
 }
 
 function handleEditLetterButton (letterID) {

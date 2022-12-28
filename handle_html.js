@@ -383,21 +383,8 @@ function deltaTblUpdateCell (originStateID, letterID) {
     }
 
 }
-/**
-function deltaTblAddCell (arrow) {
-    let btn = simpleCreateElement("BUTTON", protoStateMap.get(arrow.destID).name);
-    btn.onclick = function () {
-        updateCS("arrow", arrow.id);
-    };
-    deltaTBody.children[protoStateMap.get(arrow.originID).idx].children[protoLetterMap.get(arrow.letterID).idx + 1].appendChild(btn);
-}
 
-function deltaTblDeleteCell (arrow) {
-    deltaTBody.children[protoStateMap.get(arrow.originID).idx].children[protoLetterMap.get(arrow.letterID).idx + 1].children[0].remove();
+function getStartingStateValue () {
+    let select = document.getElementById("startStateSelect");
+    return select.value;
 }
-
-function deltaTblRefreshCell (arrow) {
-    deltaTblDeleteCell(arrow);
-    deltaTblAddCell(arrow);
-}
-**/
