@@ -412,23 +412,38 @@ function controlChangeLetterName () {
         alert("Name can't be blank!");
     } else if (protoLetterNames.has(newName)) {
         alert("A letter \"" + newName + "\" already exists!");
-    } else {
-        let currentLetter = GSL();
-        protoLetterNames.delete(currentLetter.name);
-        currentLetter.name = newName;
-        protoLetterNames.set(currentLetter.name, currentLetter.id);
+    }
+    let currentLetter = GSL();
+    protoLetterNames.delete(currentLetter.name);
+    currentLetter.name = newName;
+    protoLetterNames.set(currentLetter.name, currentLetter.id);
 
-        // Goes thru arrow list and replaces transition displays if updated
-        for (var i = 0; i < protoArrowList.length; i++) {
-            if (protoArrowMap.get(protoArrowList[i]).letterID == currentLetter.id) {
-                arrowList.children[i].children[2].innerHTML = currentLetter.name;
-            }
+    // Updates HTML letter list
+    letterList.children[currentLetter.idx].children[0].innerHTML = currentLetter.name;
+
+    deltaTblEditCol(currentLetter);
+    updateAllArrowDisplayStrings();
+
+    // Goes thru arrow list and replaces transition displays if updated
+    for (var i = 0; i < protoArrowList.length; i++) {
+        //if (protoArrowMap.get(protoArrowList[i]).letterID == currentLetter.id) {
+        let currentArrow = protoArrowMap.get(protoArrowList[i]);
+        if (currentArrow.letterIDs.has(currentLetter.id)) {
+           //arrowList.children[i].children[2].innerHTML = currentLetter.name;
+           arrowList.children[i].children[2].innerHTML = currentArrow.displayString;
         }
+    }
+}
 
-        // Updates HTML letter list
-        letterList.children[currentLetter.idx].children[0].innerHTML = currentLetter.name;
-
-        deltaTblEditCol(currentLetter);
+function updateAllArrowDisplayStrings () {
+    for (var i = 0; i < protoArrowList.length; i++) {
+        let protoArrow = protoArrowMap.get(protoArrowList[i]);
+        let letterNames = [];
+        for (const letterID of protoArrow.letterIDs) {
+            letterNames.push(protoLetterMap.get(letterID).name);
+        }
+        letterNames.sort();   // might be a better way to do this (TODO). Right now just for convenience...
+        protoArrow.displayString = letterNames.join(", ")
     }
 }
 

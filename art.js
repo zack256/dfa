@@ -105,7 +105,8 @@ function drawProtoArrows () {
         //drawLine(protoState1.pos, protoState2.pos);
         isHighlighting = (
             (CS[0] == "arrow" && protoArrow.id == CS[1]) ||
-            (CS[0] == "letter" && protoArrow.letterID == CS[1])
+            //(CS[0] == "letter" && protoArrow.letterID == CS[1])
+            (CS[0] == "letter" && protoArrow.letterIDs.has(CS[1]))
         );
         if (isHighlighting) {
             ctx.strokeStyle = "blue";
