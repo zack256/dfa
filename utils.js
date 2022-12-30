@@ -45,3 +45,7 @@ function mod (a, b) {
     let r = a % b;
     return r < 0 ? r + b : r;
 }
+
+function sleep (ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}

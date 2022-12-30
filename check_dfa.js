@@ -13,8 +13,10 @@ function checkProtoDFA () {
         let protoState = protoStateMap.get(protoStateList[i]);
         let subFunc = new StrictMap();
         for (const [stateID, arrowID] of protoState.outgoing.entries()) {
-            let letterID = protoArrowMap.get(arrowID).letterID;
-            subFunc.set(letterID, arrowID);
+            let letterIDs = protoArrowMap.get(arrowID).letterIDs;
+            for (const letterID of letterIDs) {
+                subFunc.set(letterID, arrowID);
+            }
         }
         if (subFunc.size != protoLetterMap.size) {
             err('# Transitions for state "' + protoState.name + '" is invalid!');   // maybe put more detail
@@ -22,4 +24,5 @@ function checkProtoDFA () {
         deltaFunc.set(protoState.id, subFunc);
     }
     console.log("All checks passed!");
+    return deltaFunc;
 }

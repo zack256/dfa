@@ -83,6 +83,10 @@ function drawProtoStates () {
             drawCircle(protoState.pos.x, protoState.pos.y, protoState.radius, "white");
         }
 
+        if (currentStateID == id) {
+            drawCircle(protoState.pos.x, protoState.pos.y, protoState.radius, "green");
+        }
+
         if (protoState.isAccepting) {
             drawCircle(protoState.pos.x, protoState.pos.y, protoState.radius * goodInnerRadiusFrac);
         }

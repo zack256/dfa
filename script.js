@@ -253,6 +253,7 @@ function deleteSelectedState () {
     stateList.children[protoState.idx].remove();
     deleteStartStateOption(protoState);
     protoStateMap.delete(protoState.id);
+    deltaTblUpdateAllRowsCells();
 }
 
 function makeArrow (fromID, toID) {
