@@ -1,6 +1,6 @@
 let currentStateID = 0;
 
-let sleepInterval = 1000 * 5;   // ms
+let sleepInterval = 1000;   // ms
 
 function makeLetterToIDMap () {
     let letter2ID = new StrictMap();
@@ -16,6 +16,9 @@ function letterArrayToLetterIDArray (word) {
     let letter2ID = makeLetterToIDMap();
     let newWord = [];
     for (var i = 0; i < word.length; i++) {
+        if (!letter2ID.has(word[i])) {
+            err("Letter \"" + word[i] + "\" not found in alphabet!");
+        }
         newWord.push(letter2ID.get(word[i]));
     }
     return newWord;

@@ -461,8 +461,8 @@ function handleMouseUp (e) {
                 updateCS("state", nextProtoStateID - 1);    // bad
             }
         }
-    } else {
-        if (arrowOrigin == IDOfstateClicked) arrowOrigin = -1; // keep :)
+    } else {    // Released in a state circle
+        //if (arrowOrigin == IDOfstateClicked) arrowOrigin = -1; // keep :)
         if (arrowOrigin == -1) {
             updateCS("state", IDOfstateClicked);
         } else {

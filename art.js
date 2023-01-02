@@ -8,9 +8,9 @@ const halfArrowTheta = arrowTheta / 2;
 const showArrowTipMultiplier = 2;   // 0 if always show.
 const showArrowDist = arrowTipHeight * showArrowTipMultiplier;
 
-function drawCircle (xCoord, yCoord, radius, fillColor=null) {
+function drawCircle (pos, radius, fillColor=null) {
     ctx.beginPath();
-    ctx.ellipse(xCoord, yCoord, radius, radius, 0, 0, 2 * Math.PI);
+    ctx.ellipse(pos.x, pos.y, radius, radius, 0, 0, 2 * Math.PI);
     if (fillColor != null) {
         ctx.fillStyle = fillColor;
         ctx.fill();
@@ -26,7 +26,7 @@ function drawLine (pos1, pos2) {
     ctx.stroke();
 }
 
-function drawArrow (startPos, endPos) {
+function drawStraightArrow (startPos, endPos) {
     drawLine(startPos, endPos);
     let arrowLength = distance(startPos, endPos);
     if (arrowLength > showArrowDist) {
@@ -49,6 +49,29 @@ function drawArrow (startPos, endPos) {
         ctx.lineTo(arrowBase.x - halfBaseVector.x, arrowBase.y - halfBaseVector.y);
         ctx.fill();
     }
+}
+
+function getLoopCircleCenter (pos, radius) {
+    return new Pos(pos.x + radius, pos.y - radius);
+}
+
+function drawLoopArrow (pos, radius) {
+    // pos and radius are of the circle/state we're drawing a loop next to.
+    // drawing a loop to the upper and right of the state.
+    let loopCircleCenter = getLoopCircleCenter(pos, radius);
+    let loopCircleRadius = radius;
+    // Loop
+    ctx.beginPath();
+    ctx.arc(loopCircleCenter.x, loopCircleCenter.y, loopCircleRadius, Math.PI, Math.PI / 2); // Huh??!
+    ctx.stroke();
+    ctx.beginPath();
+    // Arrow
+    let arrowBase = new Pos(pos.x + radius + arrowTipHeight, pos.y);
+    let halfArrowTipHeight = arrowTipHeight / 2;
+    ctx.moveTo(pos.x + radius, pos.y);
+    ctx.lineTo(arrowBase.x, arrowBase.y + halfArrowTipHeight);
+    ctx.lineTo(arrowBase.x, arrowBase.y - halfArrowTipHeight);
+    ctx.fill();
 }
 
 function drawDiamondInCircle (centerPos, radius) {
@@ -78,17 +101,17 @@ function drawProtoStates () {
         protoState = protoStateMap.get(id);
 
         if (CS[0] == "state" && id == CS[1]) {
-            drawCircle(protoState.pos.x, protoState.pos.y, protoState.radius, "lightblue");
+            drawCircle(protoState.pos, protoState.radius, "lightblue");
         } else {
-            drawCircle(protoState.pos.x, protoState.pos.y, protoState.radius, "white");
+            drawCircle(protoState.pos, protoState.radius, "white");
         }
 
         if (currentStateID == id) {
-            drawCircle(protoState.pos.x, protoState.pos.y, protoState.radius, "green");
+            drawCircle(protoState.pos, protoState.radius, "green");
         }
 
         if (protoState.isAccepting) {
-            drawCircle(protoState.pos.x, protoState.pos.y, protoState.radius * goodInnerRadiusFrac);
+            drawCircle(protoState.pos, protoState.radius * goodInnerRadiusFrac);
         }
         if (protoState.id == currentStartState) {
             drawDiamondInCircle(protoState.pos, protoState.radius);
@@ -99,15 +122,9 @@ function drawProtoStates () {
 }
 
 function drawProtoArrows () {
-    var protoState1, protoState2, protoArrow, vec, midPointPos, isHighlighting;
-    for (var i = 0; i < protoArrowList.length; i++) {
-        protoArrow = protoArrowMap.get(protoArrowList[i]);
-        protoState1 = protoStateMap.get(protoArrow.originID);
-        protoState2 = protoStateMap.get(protoArrow.destID);
-        vec = new Vector(protoState2.pos.x - protoState1.pos.x, protoState2.pos.y - protoState1.pos.y);
-        vec = vec.parallelOfMagnitude(distance(protoState1.pos, protoState2.pos) - protoState2.radius);
-        //drawLine(protoState1.pos, protoState2.pos);
-        isHighlighting = (
+    for (let i = 0; i < protoArrowList.length; i++) {
+        let protoArrow = protoArrowMap.get(protoArrowList[i]);
+        let isHighlighting = (
             (CS[0] == "arrow" && protoArrow.id == CS[1]) ||
             //(CS[0] == "letter" && protoArrow.letterID == CS[1])
             (CS[0] == "letter" && protoArrow.letterIDs.has(CS[1]))
@@ -116,13 +133,31 @@ function drawProtoArrows () {
             ctx.strokeStyle = "blue";
             ctx.fillStyle = "blue";
         }
-        drawArrow(protoState1.pos, new Pos(protoState1.pos.x + vec.x, protoState1.pos.y + vec.y));
-        //midPointPos = new Pos(protoState1.pos.x + vec.x / 2, protoState1.pos.y + vec.y / 2);
-        midPointPos = new Pos((protoState1.pos.x + protoState2.pos.x) / 2, (protoState1.pos.y + protoState2.pos.y) / 2);
-        //if (protoArrow.letterID != -1) {
-        if (protoArrow.letterIDs.size != 0) {
-            //ctx.fillText(protoLetterMap.get(protoArrow.letterID).name, midPointPos.x, midPointPos.y);
-            ctx.fillText(protoArrow.displayString, midPointPos.x, midPointPos.y);
+
+        if (protoArrow.originID != protoArrow.destID) {
+            // Straight arrow connecting 2 diff states.
+            let protoState1 = protoStateMap.get(protoArrow.originID);
+            let protoState2 = protoStateMap.get(protoArrow.destID);
+            let vec = new Vector(protoState2.pos.x - protoState1.pos.x, protoState2.pos.y - protoState1.pos.y);
+            vec = vec.parallelOfMagnitude(distance(protoState1.pos, protoState2.pos) - protoState2.radius);
+            //drawLine(protoState1.pos, protoState2.pos);
+            drawStraightArrow(protoState1.pos, new Pos(protoState1.pos.x + vec.x, protoState1.pos.y + vec.y));
+            //midPointPos = new Pos(protoState1.pos.x + vec.x / 2, protoState1.pos.y + vec.y / 2);
+            let midPointPos = new Pos((protoState1.pos.x + protoState2.pos.x) / 2, (protoState1.pos.y + protoState2.pos.y) / 2);
+            //if (protoArrow.letterID != -1) {
+            if (protoArrow.letterIDs.size != 0) {
+                //ctx.fillText(protoLetterMap.get(protoArrow.letterID).name, midPointPos.x, midPointPos.y);
+                ctx.fillText(protoArrow.displayString, midPointPos.x, midPointPos.y);
+            }
+        } else {
+            // Circle arrow connecting a state to itself.
+            let protoState = protoStateMap.get(protoArrow.originID);
+            drawLoopArrow(protoState.pos, protoState.radius);
+            if (protoArrow.letterIDs.size != 0) {
+                let loopCircleCenter = getLoopCircleCenter(protoState.pos, protoState.radius);
+                let loopTextCenter = new Pos(loopCircleCenter.x + protoState.radius, loopCircleCenter.y - protoState.radius);
+                ctx.fillText(protoArrow.displayString, loopTextCenter.x, loopTextCenter.y);
+            }
         }
         if (isHighlighting) {
             ctx.strokeStyle = "black";
@@ -135,7 +170,7 @@ function drawCurrentArrow () {
     if (arrowOrigin == -1) return;
     let protoState = protoStateMap.get(arrowOrigin);
     //drawLine(protoState.pos, mousePos);
-    drawArrow(protoState.pos, mousePos);
+    drawStraightArrow(protoState.pos, mousePos);
 }
 
 function drawProtoDFA () {
