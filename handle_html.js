@@ -265,19 +265,24 @@ function populateArrowControl (protoArrow) {
 function populateLetterControl (letter) {
     clearControl();
     let p = simpleCreateElement("P", "Editing letter");
-    let inp = simpleCreateElement("INPUT");
-    inp.value = letter.name;
-    inp.id = "letterControlNameInp";
-    let renameButton = simpleCreateElement("BUTTON", "Change name");
-    renameButton.onclick = controlChangeLetterName;
 
     let prevBtn = simpleCreateElement("BUTTON", "Previous");
     prevBtn.onclick = function () { cycleDisplay(-1) };
     let nextBtn = simpleCreateElement("BUTTON", "Next");
     nextBtn.onclick = function () { cycleDisplay(1) };
 
+    let inp = simpleCreateElement("INPUT");
+    inp.value = letter.name;
+    inp.id = "letterControlNameInp";
+    let renameButton = simpleCreateElement("BUTTON", "Change name");
+    renameButton.onclick = controlChangeLetterName;
+
+    let deleteBtn = simpleCreateElement("BUTTON", "Delete");
+    deleteBtn.onclick = controlDeleteLetter;
+
     appendMultipleChildren(controlDiv, [
-        p, prevBtn, nextBtn, makeBR(), inp, renameButton, makeBR()
+        p, prevBtn, nextBtn, makeBR(),
+        inp, renameButton, makeBR(), deleteBtn
     ]);
 }
 
@@ -304,6 +309,11 @@ function addLetterTR (letter) {
     td2.appendChild(btn);
     appendMultipleChildren(tr, [td1, td2]);
     tbody.append(tr);
+}
+
+function deleteLetterTR (letter) {
+    let tbody = document.getElementById("alphabetTBody");
+    tbody.children[letter.idx].remove();
 }
 
 function addStartStateOption (protoState) {
@@ -381,14 +391,12 @@ function deltaTblEditCol (letter) {
     deltaTHead.children[0].children[letter.idx + 1].children[0].innerHTML = letter.name;
 }
 
-/**
 function deltaTblDeleteCol (letter) {
-    deltaTHead.children[0].children[letter.idx].remove();
+    deltaTHead.children[0].children[letter.idx + 1].remove();
     for (var i = 0; i < deltaTBody.children.length; i++) {
-        deltaTBody.children[i].children[letter.idx].remove();
+        deltaTBody.children[i].children[letter.idx + 1].remove();
     }
 }
-*/
 
 /**
 function deltaTblUpdateCell (originStateID, letterID) {

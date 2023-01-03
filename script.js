@@ -24,7 +24,7 @@ const deltaTBody = document.getElementById("deltaTBody");
 let dfa = null;
 let CS = [null, -1];
 
-let nextProtoStateID, nextProtoArrowID, nextProtoLetterID, arrowOrigin;
+let nextProtoStateID, nextProtoArrowID, nextProtoLetterID, arrowOrigin, defaultLetterID;
 
 let protoStateList = [];
 let protoStateNames = new StrictMap();    // for now
@@ -259,7 +259,12 @@ function deleteSelectedState () {
 function makeArrow (fromID, toID) {
     if (!protoStateMap.get(fromID).outgoing.has(toID)) {
 
-        let newProtoArrow = new ProtoArrow(nextProtoArrowID, protoArrowList.length, new Set([1]), protoLetterMap.get(1).name, fromID, toID);
+        // If no letters yet, creates one.s
+        if (protoLetterList.length == 0) {
+            addLetter("a");
+        }
+
+        let newProtoArrow = new ProtoArrow(nextProtoArrowID, protoArrowList.length, new Set([defaultLetterID]), protoLetterMap.get(defaultLetterID).name, fromID, toID);
         nextProtoArrowID++;
         protoStateMap.get(fromID).outgoing.set(toID, newProtoArrow.id);
         protoStateMap.get(toID).incoming.set(fromID, newProtoArrow.id);
@@ -274,6 +279,9 @@ function makeArrow (fromID, toID) {
 function addLetter (letterName) {
     if (protoLetterNames.has(letterName)) err ("duplicate letter add");
     let letter = new ProtoLetter(nextProtoLetterID, protoLetterList.length, letterName);
+    if (defaultLetterID == 0) {
+        defaultLetterID = nextProtoLetterID;
+    }
     nextProtoLetterID++;
     protoLetterList.push(letter.id);
     protoLetterNames.set(letterName, letter.id);
@@ -304,22 +312,6 @@ function handleAddLetter () {
 function handleArrowEditButton (arrowID) {
    updateCS("arrow", arrowID);
 }
-/**
-function handleChangeTransitionButton () {
-    // Handles when "change" button pressed on arrow's transition.
-    let inp = document.getElementById("arrowControlLetterInp");
-    let newLetter = inp.value;
-    if (protoLetterNames.has(newLetter)) {
-        let currentArrow = GSA();
-        let prevOID = currentArrow.originID;
-        let prevLID = currentArrow.letterID;
-        currentArrow.letterID = protoLetterNames.get(newLetter);
-        arrowList.children[currentArrow.idx].children[2].innerHTML = protoLetterMap.get(currentArrow.letterID).name;
-        deltaTblUpdateCell(prevOID, prevLID);
-        deltaTblUpdateCell(currentArrow.originID, currentArrow.letterID);
-    }
-}
-**/
 
 function handleUpdateTransitionsButton () {
     // Handles when "update" button pressed on arrow's transition.
@@ -436,6 +428,37 @@ function controlChangeLetterName () {
     }
 }
 
+function resetDefaultLetterID () {
+    if (protoLetterList.length == 0) {
+        defaultLetterID = 0;
+    } else {
+        defaultLetterID = Infinity;
+        for (const letterID of protoLetterList) {
+            defaultLetterID = Math.min(defaultLetterID, letterID);
+        }
+    }
+}
+
+function controlDeleteLetter () {
+    let currentLetter = GSL();
+    for (const protoArrowID of protoArrowList) {
+        let protoArrow = protoArrowMap.get(protoArrowID);
+        if (protoArrow.letterIDs.has(currentLetter.id)) {
+            err("Can't delete letter, still has corresponding transitions!");
+        }
+    }
+    updateCS(null, -1);
+    for (let i = currentLetter.idx + 1; i < protoLetterList.length; i++) {
+        protoLetterMap.get(protoLetterList[i]).idx--;
+    }
+    deleteLetterTR(currentLetter);
+    deltaTblDeleteCol(currentLetter);
+    pop(protoLetterList, currentLetter.idx);
+    protoLetterNames.delete(currentLetter.name);
+    protoLetterMap.delete(currentLetter.id);
+    resetDefaultLetterID();
+}
+
 function updateAllArrowDisplayStrings () {
     for (var i = 0; i < protoArrowList.length; i++) {
         let protoArrow = protoArrowMap.get(protoArrowList[i]);
@@ -507,6 +530,7 @@ function resetProgram (initializeALetter=true) {
     nextProtoStateID = 1;   // Can rm if wanted.
     nextProtoArrowID = 1;   // ""
     nextProtoLetterID = 1;
+    defaultLetterID = 1;
 
     arrowOrigin = -1;
 
