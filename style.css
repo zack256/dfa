@@ -9,7 +9,7 @@
     top : 775px;
 }
 
-#canvas, #leftDiv, #controlDiv {
+#canvas, #leftDiv, #controlDiv, #simulateDiv {
     border : 2px solid black;
 }
 /**
@@ -33,11 +33,21 @@
     background-color: lightblue;
 }
 
-#controlDiv {
+#controlDiv, #simulateDiv {
     position: absolute;
-    padding: 0.5em;
+    padding : 0.5em;
     left : 80%;
-    width: 20%;
+    width : 20%;
+}
+
+#controlDiv {
+    max-height: 30%;
+    overflow: scroll;
+}
+
+#simulateDiv {
+    top : 30%;
+    max-height: 70%;
 }
 
 .panelDiv {

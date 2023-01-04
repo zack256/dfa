@@ -39,6 +39,8 @@ let protoLetterMap = new StrictMap();
 
 let mousePos = new Pos(null, null);
 
+let mouseMovedOutoOfState = false;
+
 function GSS () {
     if (CS[0] != "state") {
         err("GSS when no state selected!");
@@ -476,23 +478,21 @@ function handleMouseUp (e) {
     let IDOfstateClicked = getStateFromPos(pos);
 
     if (IDOfstateClicked == null) {
-        if (arrowOrigin != -1) {
-            arrowOrigin = -1;
-        } else {
+        if (arrowOrigin == -1) {
             let res = makeProtoState(pos);
             if (res) {
                 updateCS("state", nextProtoStateID - 1);    // bad
             }
         }
     } else {    // Released in a state circle
-        //if (arrowOrigin == IDOfstateClicked) arrowOrigin = -1; // keep :)
-        if (arrowOrigin == -1) {
+        if (arrowOrigin == IDOfstateClicked && !mouseMovedOutoOfState) {
             updateCS("state", IDOfstateClicked);
         } else {
             makeArrow(arrowOrigin, IDOfstateClicked);
-            arrowOrigin = -1;
         }
     }
+    arrowOrigin = -1;
+    mouseMovedOutoOfState = false;
 }
 
 function handleMouseDown (e) {
@@ -542,6 +542,12 @@ function resetProgram (initializeALetter=true) {
 
 function handleMouseMove (e) {
     mousePos = getCanvasCoordinates(e);
+    if (arrowOrigin != -1) {
+        let IDOfstateClicked = getStateFromPos(mousePos);
+        if (IDOfstateClicked == null) {
+            mouseMovedOutoOfState = true;
+        }
+    }
 }
 
 canvas.addEventListener("mouseup", function (e) {
