@@ -289,6 +289,7 @@ function addLetter (letterName) {
     protoLetterNames.set(letterName, letter.id);
     protoLetterMap.set(letter.id, letter);
     addLetterTR(letter);
+    addLetterToWordLetterSelect(letter);
     deltaTblAddCol(letter);
     updateCS("letter", letter.id);
 }
@@ -418,6 +419,7 @@ function controlChangeLetterName () {
 
     deltaTblEditCol(currentLetter);
     updateAllArrowDisplayStrings();
+    editWordLetterSelectOption(currentLetter);
 
     // Goes thru arrow list and replaces transition displays if updated
     for (var i = 0; i < protoArrowList.length; i++) {
@@ -454,6 +456,7 @@ function controlDeleteLetter () {
         protoLetterMap.get(protoLetterList[i]).idx--;
     }
     deleteLetterTR(currentLetter);
+    deleteLetterFromWordLetterSelect(currentLetter);
     deltaTblDeleteCol(currentLetter);
     pop(protoLetterList, currentLetter.idx);
     protoLetterNames.delete(currentLetter.name);

@@ -46,8 +46,9 @@
 }
 
 #simulateDiv {
-    top : 30%;
-    max-height: 70%;
+    top : 35%;  /* All this CSS stuff is temporary...**/
+    max-height: 60%;
+    overflow-y: scroll;
 }
 
 .panelDiv {

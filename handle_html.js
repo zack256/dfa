@@ -316,6 +316,24 @@ function deleteLetterTR (letter) {
     tbody.children[letter.idx].remove();
 }
 
+function addLetterToWordLetterSelect (letter) {
+    let select = document.getElementById("addLetterToWordSelect");
+    let option = simpleCreateElement("OPTION", letter.name);
+    option.value = letter.id;
+    select.appendChild(option);
+}
+
+function editWordLetterSelectOption (letter) {
+    let select = document.getElementById("addLetterToWordSelect");
+    select.children[letter.idx].value = letter.id;
+    select.children[letter.idx].innerHTML = letter.name;
+}
+
+function deleteLetterFromWordLetterSelect (letter) {
+    let select = document.getElementById("addLetterToWordSelect");
+    select.children[letter.idx].remove();
+}
+
 function addStartStateOption (protoState) {
     let select = document.getElementById("startStateSelect");
     let option = simpleCreateElement("OPTION", protoState.name);
@@ -447,4 +465,24 @@ function deltaTblUpdateAllRowsCells () {
 function getStartingStateValue () {
     let select = document.getElementById("startStateSelect");
     return select.value;
+}
+
+function wordAddLetterTR () {
+    //let letterName = document.getElementById("addLetterToWordSelect").value;
+    let letterID = Number(document.getElementById("addLetterToWordSelect").value);
+    //if (!protoLetterNames.has(letterName)) {
+    if (!protoLetterMap.has(letterID)) {
+        err("Letter can't be added to word because it doesn't exist!");
+    }
+    //let letter = protoLetterMap.get(protoStateNames.get(letterName));
+    let letter = protoLetterMap.get(letterID);
+    let wordTBody = document.getElementById("wordTBody");
+    let tr = simpleCreateElement("TR");
+    let td1 = simpleCreateElement("TD", wordTBody.children.length + 1);
+    let td2 = simpleCreateElement("TD", letter.name);
+    let rmBtn = simpleCreateElement("BUTTON", "-");
+    let td3 = simpleCreateElement("TD");
+    td3.appendChild(rmBtn);
+    appendMultipleChildren(tr, [td1, td2, td3]);
+    wordTBody.appendChild(tr);
 }

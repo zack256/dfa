@@ -14,7 +14,7 @@
         <div id="buttonsDiv">
             <button onclick = "resetProgram();">Clear (ALL!)</button>
             <button onclick = "checkProtoDFA();">Check</button>
-            <button onclick = "simulateDFA(['z', 'a', 'c', 'k']);">Check+Simulate</button>
+            <button onclick = "simulateDFA();">Check+Simulate</button>
         </div>
         <div id="leftDiv">
             <div id="panelButtonsDiv">
@@ -78,7 +78,24 @@
         </div>
 
         <div id="controlDiv"></div>
-        <div id="simulateDiv"></div>
+        <div id="simulateDiv">
+            <p>Word</p>
+            <table>
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Letter</th>
+                        <th></th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody id="wordTBody">
+
+                </tbody>
+            </table>
+            <select id="addLetterToWordSelect"></select>
+            <button id="addLetterToWordButton" onclick="wordAddLetterTR();">Add</button>
+        </div>
         <script src="utils.js"></script>
         <script src="pos.js"></script>
         <script src="vector.js"></script>

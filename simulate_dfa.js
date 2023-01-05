@@ -24,10 +24,23 @@ function letterArrayToLetterIDArray (word) {
     return newWord;
 }
 
-async function simulateDFA (word) {
+function readWordFromPanel () {
+    let tbody = document.getElementById("wordTBody");
+    let word = [];
+    for (let i = 0; i < tbody.children.length; i++) {
+        let letter = tbody.children[i].children[1].innerHTML;
+        word.push(letter);
+    }
+    return word;
+}
+
+async function simulateDFA (word=null) {
     // Visually simulated the DFA.
     // Word is an array of letter IDs.
     let deltaFunc = checkProtoDFA();
+    if (word == null) {
+        word = readWordFromPanel();
+    }
     let letterIDs = letterArrayToLetterIDArray(word);
     currentStateID = Number(getStartingStateValue());
     for (var i = 0; i < word.length; i++) {
