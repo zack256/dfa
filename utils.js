@@ -4,6 +4,11 @@ function err (msg) {
     process.exit(1);
 }
 
+function alertAndErr (msg) {
+    alert(msg);
+    err(msg);
+}
+
 function getRandomNumber (low, high) {
     // [low, high)
     let delta = high - low;

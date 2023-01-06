@@ -198,6 +198,7 @@ function updateCS (newWhat, newID) {
         newTR.classList.add("DFA_selectedState");
         populateLetterControl(GSL());
     }
+    updateWordLetterHighlights();
 }
 
 function resetCS () {
@@ -397,19 +398,17 @@ function handleDeleteTransitionButton () {
     protoArrowMap.delete(arrow.id);
 }
 
-function handleEditLetterButton (letterID) {
-    updateCS("letter", letterID);
-}
-
 function controlChangeLetterName () {
     let inp = document.getElementById("letterControlNameInp");
     let newName = inp.value;
     if (newName == "") {
-        alert("Name can't be blank!");
+        alertAndErr("Name can't be blank!");
     } else if (protoLetterNames.has(newName)) {
-        alert("A letter \"" + newName + "\" already exists!");
+        alertAndErr("A letter \"" + newName + "\" already exists!");
     }
+    
     let currentLetter = GSL();
+    renameWordLetters(currentLetter.name, newName);
     protoLetterNames.delete(currentLetter.name);
     currentLetter.name = newName;
     protoLetterNames.set(currentLetter.name, currentLetter.id);

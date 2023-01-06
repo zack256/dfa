@@ -43,9 +43,14 @@ async function simulateDFA (word=null) {
     }
     let letterIDs = letterArrayToLetterIDArray(word);
     currentStateID = Number(getStartingStateValue());
-    for (var i = 0; i < word.length; i++) {
+    let wordTBody = document.getElementById("wordTBody");
+    for (let i = 0; i < word.length; i++) {
         await sleep(sleepInterval);
         let nextArrowID = deltaFunc.get(currentStateID).get(letterIDs[i]);
         currentStateID = protoStateMap.get(protoArrowMap.get(nextArrowID).destID).id;
+        wordTBody.children[i].classList.add("simulatingLetter");
+        if (i != 0) {
+            wordTBody.children[i - 1].classList.remove("simulatingLetter");
+        }
     }
 }

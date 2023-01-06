@@ -303,9 +303,7 @@ function addLetterTR (letter) {
     let td1 = simpleCreateElement("TD", letter.name);
     let td2 = simpleCreateElement("TD");
     let btn = simpleCreateElement("BUTTON", "Edit");
-    btn.onclick = function () {
-        handleEditLetterButton(letter.id);
-    }
+    btn.onclick = function () { updateCS("letter", letter.id); };
     td2.appendChild(btn);
     appendMultipleChildren(tr, [td1, td2]);
     tbody.append(tr);
@@ -478,11 +476,53 @@ function wordAddLetterTR () {
     let letter = protoLetterMap.get(letterID);
     let wordTBody = document.getElementById("wordTBody");
     let tr = simpleCreateElement("TR");
-    let td1 = simpleCreateElement("TD", wordTBody.children.length + 1);
+    if ((CS[0] == "letter") && (letterID == GSL().id)) {
+        tr.classList.add("selectedLetter");
+    }
+    let idx = wordTBody.children.length + 1;
+    let td1 = simpleCreateElement("TD", idx);
     let td2 = simpleCreateElement("TD", letter.name);
     let rmBtn = simpleCreateElement("BUTTON", "-");
+    rmBtn.onclick = function () { wordRemoveLetter(idx); };
     let td3 = simpleCreateElement("TD");
     td3.appendChild(rmBtn);
     appendMultipleChildren(tr, [td1, td2, td3]);
     wordTBody.appendChild(tr);
+}
+
+function wordRemoveLetter (idx) {
+    // [idx] is 1-idx'd
+    let wordTBody = document.getElementById("wordTBody");
+    for (let i = idx; i < wordTBody.children.length; i++) {
+        wordTBody.children[i].children[0].innerHTML = i;
+        wordTBody.children[i].children[2].children[0].onclick = function () { wordRemoveLetter(i) };
+    }
+    wordTBody.children[idx - 1].remove();
+}
+
+function updateWordLetterHighlights () {
+    let letterName = null;
+    if (CS[0] == "letter") {
+        letterName = GSL().name;
+    }
+    let wordTBody = document.getElementById("wordTBody");
+    for (let i = 0; i < wordTBody.children.length; i++) {
+        let tr = wordTBody.children[i];
+        let td = tr.children[1];
+        if ((letterName != null) && (td.innerHTML == letterName)) {
+            tr.classList.add("selectedLetter");
+        } else {
+            tr.classList.remove("selectedLetter");
+        }
+    }
+}
+
+function renameWordLetters (oldName, newName) {
+    let wordTBody = document.getElementById("wordTBody");
+    for (let i = 0; i < wordTBody.children.length; i++) {
+        let td = wordTBody.children[i].children[1];
+        if (td.innerHTML == oldName) {
+            td.innerHTML = newName;
+        }
+    }
 }

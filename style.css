@@ -33,6 +33,14 @@
     background-color: lightblue;
 }
 
+.selectedLetter {
+    background-color: lightblue;
+}
+
+.simulatingLetter {
+    background-color: green;
+}
+
 #controlDiv, #simulateDiv {
     position: absolute;
     padding : 0.5em;
