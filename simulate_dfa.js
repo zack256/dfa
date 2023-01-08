@@ -53,4 +53,7 @@ async function simulateDFA (word=null) {
             wordTBody.children[i - 1].classList.remove("simulatingLetter");
         }
     }
+    await sleep(sleepInterval);
+    wordTBody.children[word.length - 1].classList.remove("simulatingLetter");
+    currentStateID = 0;
 }

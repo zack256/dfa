@@ -7,6 +7,7 @@
     position : absolute;
     left : 50%;
     top : 775px;
+    transform: translate(-50%, 0%);
 }
 
 #canvas, #leftDiv, #controlDiv, #simulateDiv {
@@ -29,7 +30,6 @@
 }
 
 .DFA_selectedState {
-    /** border : 2px solid blue; **/
     background-color: lightblue;
 }
 

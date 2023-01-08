@@ -227,7 +227,7 @@ function cycleDisplay (direction) {
 function deleteSelectedState () {
     // Assumes a state is selected!
     let protoState = GSS();
-    updateCS(null, -1);
+    resetCS();
     let z = 0, protoArrow, isOrigin, isDest;
     while (z < protoArrowList.length) {
         protoArrow = protoArrowMap.get(protoArrowList[z]);
@@ -381,7 +381,7 @@ function handleChangeArrowDestButton () {
 
 function handleDeleteTransitionButton () {
     let arrow = GSA();
-    updateCS(null, -1);
+    resetCS();
 
     for (var i = arrow.idx + 1; i < protoArrowList.length; i++) {
         protoArrowMap.get(protoArrowList[i]).idx--;
@@ -450,7 +450,7 @@ function controlDeleteLetter () {
             err("Can't delete letter, still has corresponding transitions!");
         }
     }
-    updateCS(null, -1);
+    resetCS();
     for (let i = currentLetter.idx + 1; i < protoLetterList.length; i++) {
         protoLetterMap.get(protoLetterList[i]).idx--;
     }
@@ -515,6 +515,8 @@ function resetProgram (initializeALetter=true) {
     letterList.replaceChildren();
     deltaTHead.replaceChildren();
     deltaTBody.replaceChildren();
+    clearWordLetterSelect();
+    clearWordLetters();
     clearStartStateSelect();
     resetDeltaTH();
 

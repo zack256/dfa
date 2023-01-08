@@ -214,26 +214,8 @@ function populateArrowControl (protoArrow) {
     td4.appendChild(btn2);
     tr2 = simpleCreateElement("TR");
     appendMultipleChildren(tr2, [td1, td2, td3, td4]);
-
     tbl1 = makeTable(null, [tr1, tr2]);
 
-    /** 
-    label = simpleCreateElement("LABEL", "Add Letters: ");
-    select = simpleCreateElement("SELECT");
-    select.id = "arrowControlLetterInp";
-    let letter;
-    for (const letterID of protoLetterList) {
-        letter = protoLetterMap.get(letterID);
-        option = simpleCreateElement("OPTION", letter.name);
-        //if (protoArrow.letterID == letterID) {
-        //    option.setAttribute("selected", "selected");
-        //}
-        select.appendChild(option);
-    }
-    let renameBtn = simpleCreateElement("BUTTON", "Add");
-    renameBtn.onclick = handleChangeTransitionButton;
-    **/
-    //let p4 = simpleCreateElement("P", "Letter: " + protoLetterMap.get(protoArrow.letterID).name);
     let delBtn = simpleCreateElement("BUTTON", "Delete");
     delBtn.onclick = handleDeleteTransitionButton;
 
@@ -321,6 +303,10 @@ function addLetterToWordLetterSelect (letter) {
     select.appendChild(option);
 }
 
+function clearWordLetterSelect () {
+    document.getElementById("addLetterToWordSelect").replaceChildren();
+}
+
 function editWordLetterSelectOption (letter) {
     let select = document.getElementById("addLetterToWordSelect");
     select.children[letter.idx].value = letter.id;
@@ -380,7 +366,6 @@ function deltaTblAddRow (state) {
 }
 
 function deltaTblEditRow (state) {
-    // Rename.
     deltaTBody.children[state.idx].children[0].children[0].innerHTML = state.name;
 }
 
@@ -403,7 +388,6 @@ function deltaTblAddCol (letter) {
 }
 
 function deltaTblEditCol (letter) {
-    // Rename.
     deltaTHead.children[0].children[letter.idx + 1].children[0].innerHTML = letter.name;
 }
 
@@ -413,27 +397,6 @@ function deltaTblDeleteCol (letter) {
         deltaTBody.children[i].children[letter.idx + 1].remove();
     }
 }
-
-/**
-function deltaTblUpdateCell (originStateID, letterID) {
-    let originState = protoStateMap.get(originStateID);
-    let letter = protoLetterMap.get(letterID);
-    deltaTBody.children[originState.idx].children[letter.idx + 1].replaceChildren();
-
-    for (const [stateID, arrowID] of originState.outgoing.entries()) {
-        let arrow = protoArrowMap.get(arrowID);
-        if (arrow.letterID != letterID) {
-            continue;
-        }
-        let destState = protoStateMap.get(stateID);
-        let btn = simpleCreateElement("BUTTON", destState.name);
-        btn.onclick = function () {
-            updateCS("arrow", arrow.id);
-        };
-        deltaTBody.children[originState.idx].children[letter.idx + 1].appendChild(btn);
-    }
-}
-**/
 
 function deltaTblUpdateRowCells (originStateID) {
     let originState = protoStateMap.get(originStateID);
@@ -486,7 +449,8 @@ function wordAddLetterTR () {
     rmBtn.onclick = function () { wordRemoveLetter(idx); };
     let td3 = simpleCreateElement("TD");
     td3.appendChild(rmBtn);
-    appendMultipleChildren(tr, [td1, td2, td3]);
+    let td4 = simpleCreateElement("TD", "???");
+    appendMultipleChildren(tr, [td1, td2, td3, td4]);
     wordTBody.appendChild(tr);
 }
 
@@ -498,6 +462,10 @@ function wordRemoveLetter (idx) {
         wordTBody.children[i].children[2].children[0].onclick = function () { wordRemoveLetter(i) };
     }
     wordTBody.children[idx - 1].remove();
+}
+
+function clearWordLetters () {
+    document.getElementById("wordTBody").replaceChildren();
 }
 
 function updateWordLetterHighlights () {
