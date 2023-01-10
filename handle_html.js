@@ -61,7 +61,7 @@ function createArrowTR (protoArrow) {
     let btn = simpleCreateElement("BUTTON", "Edit");
     let id = protoArrow.id;
     btn.onclick = function () {
-        handleArrowEditButton(id);
+        updateCS("arrow", id);
     }
     let td4 = simpleCreateElement("TD");
     td4.appendChild(btn);
@@ -104,7 +104,7 @@ function populateStateControl (protoState) {
         arrow = protoArrowMap.get(arrowID);
         tr = simpleCreateElement("TR");
         btn = simpleCreateElement("BUTTON", "Edit");
-        btn.onclick = function () { handleArrowEditButton(arrowID); }
+        btn.onclick = function () { updateCS("arrow", arrowID); }
         appendMultipleChildren(tr, [
             simpleCreateElement("TD", state.name),
             //simpleCreateElement("TD", protoLetterMap.get(arrow.letterID).name),
@@ -129,7 +129,7 @@ function populateStateControl (protoState) {
         arrow = protoArrowMap.get(arrowID);
         tr = simpleCreateElement("TR");
         btn = simpleCreateElement("BUTTON", "Edit");
-        btn.onclick = function () { handleArrowEditButton(arrowID); }
+        btn.onclick = function () { updateCS("arrow", arrowID); }
         appendMultipleChildren(tr, [
             simpleCreateElement("TD", state.name),
             //simpleCreateElement("TD", protoLetterMap.get(arrow.letterID).name),
@@ -452,6 +452,7 @@ function wordAddLetterTR () {
     let td4 = simpleCreateElement("TD", "???");
     appendMultipleChildren(tr, [td1, td2, td3, td4]);
     wordTBody.appendChild(tr);
+    updateWordStateChain();
 }
 
 function wordRemoveLetter (idx) {
@@ -462,6 +463,7 @@ function wordRemoveLetter (idx) {
         wordTBody.children[i].children[2].children[0].onclick = function () { wordRemoveLetter(i) };
     }
     wordTBody.children[idx - 1].remove();
+    updateWordStateChain();
 }
 
 function clearWordLetters () {
@@ -491,6 +493,51 @@ function renameWordLetters (oldName, newName) {
         let td = wordTBody.children[i].children[1];
         if (td.innerHTML == oldName) {
             td.innerHTML = newName;
+        }
+    }
+}
+
+function updateWordStateChain () {
+    let clearing = false;
+    let currentStateID = Number(getStartingStateValue());
+    let startStateP = document.getElementById("simulateStartStateP");
+    let wordTBody = document.getElementById("wordTBody");
+    if (currentStateID == 0) {
+        clearing = true;
+        startStateP.innerHTML = "???";
+    } else {
+        startStateP.innerHTML = protoStateMap.get(currentStateID).name;
+    }
+    for (let i = 0; i < wordTBody.children.length; i++) {
+        if (clearing) {
+            wordTBody.children[i].children[3].innerHTML = "???";
+        } else {
+            let state = protoStateMap.get(currentStateID);
+            let letter = protoLetterMap.get(protoLetterNames.get(wordTBody.children[i].children[1].innerHTML));
+            let numLettersFound = 0;
+            for (const [stateID, arrowID] of state.outgoing.entries()) {
+                let arrow = protoArrowMap.get(arrowID);
+                for (const letterID of arrow.letterIDs) {
+                    if (letterID == letter.id) {
+                        numLettersFound++;
+                        if (numLettersFound > 1) {
+                            clearing = true;
+                            wordTBody.children[i].children[3].innerHTML = "???";
+                            break;
+                        }
+                        currentStateID = stateID;
+                        wordTBody.children[i].children[3].innerHTML = protoStateMap.get(currentStateID).name;
+                        flag = true;
+                    }
+                }
+                if (numLettersFound > 1) {
+                    break;
+                }
+            }
+            if (numLettersFound == 0) {
+                clearing = true;
+                wordTBody.children[i].children[3].innerHTML = "???";
+            }
         }
     }
 }

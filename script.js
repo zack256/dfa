@@ -276,6 +276,7 @@ function makeArrow (fromID, toID) {
         createArrowTR(newProtoArrow);
         deltaTblUpdateRowCells(fromID);
         updateCS("arrow", newProtoArrow.id);
+        updateWordStateChain();
     }
 }
 
@@ -313,10 +314,6 @@ function handleAddLetter () {
     }
 }
 
-function handleArrowEditButton (arrowID) {
-   updateCS("arrow", arrowID);
-}
-
 function handleUpdateTransitionsButton () {
     // Handles when "update" button pressed on arrow's transition.
     let currentArrow = GSA();
@@ -334,6 +331,7 @@ function handleUpdateTransitionsButton () {
     currentArrow.displayString = lettersArray.join(", ");
     arrowList.children[currentArrow.idx].children[2].innerHTML = currentArrow.displayString;
     deltaTblUpdateRowCells(currentArrow.originID);
+    updateWordStateChain();
 }
 
 function handleChangeArrowOriginButton () {
@@ -341,7 +339,6 @@ function handleChangeArrowOriginButton () {
     let newOriginName = originInp.value;
     let currentArrow = GSA();
     let prevOID = currentArrow.originID;
-    let prevLID = currentArrow.letterID;
     let oldOrigin = protoStateMap.get(currentArrow.originID);
     let newOrigin = protoStateMap.get(protoStateNames.get(newOriginName));
     if (newOrigin.outgoing.has(currentArrow.destID) && newOrigin.outgoing.get(currentArrow.destID) != currentArrow.id) {
@@ -357,6 +354,7 @@ function handleChangeArrowOriginButton () {
     arrowList.children[currentArrow.idx].children[0].innerHTML = newOriginName;
     deltaTblUpdateRowCells(prevOID);
     deltaTblUpdateRowCells(currentArrow.originID);
+    updateWordStateChain();
 }
 
 function handleChangeArrowDestButton () {
@@ -377,6 +375,7 @@ function handleChangeArrowDestButton () {
     newDest.incoming.set(currentArrow.originID, currentArrow.id);
     arrowList.children[currentArrow.idx].children[1].innerHTML = newDestName;
     deltaTblUpdateRowCells(currentArrow.originID);
+    updateWordStateChain();
 }
 
 function handleDeleteTransitionButton () {
@@ -396,6 +395,7 @@ function handleDeleteTransitionButton () {
     deltaTblUpdateRowCells(arrow.originID);
 
     protoArrowMap.delete(arrow.id);
+    updateWordStateChain();
 }
 
 function controlChangeLetterName () {
