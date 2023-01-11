@@ -96,7 +96,7 @@ function getRandomStateCoords () {
 function drawProtoStates () {
     var id, protoState;
     let currentStartState = document.getElementById("startStateSelect").value;
-    for (var i = 0; i < protoStateList.length; i++) {
+    for (let i = 0; i < protoStateList.length; i++) {
         id = protoStateList[i];
         protoState = protoStateMap.get(id);
 
@@ -121,6 +121,11 @@ function drawProtoStates () {
     }
 }
 
+function setStrokeAndFillStyle (color) {
+    ctx.strokeStyle = color;
+    ctx.fillStyle = color;
+}
+
 function drawProtoArrows () {
     for (let i = 0; i < protoArrowList.length; i++) {
         let protoArrow = protoArrowMap.get(protoArrowList[i]);
@@ -129,8 +134,10 @@ function drawProtoArrows () {
             (CS[0] == "letter" && protoArrow.letterIDs.has(CS[1]))
         );
         if (isHighlighting) {
-            ctx.strokeStyle = "blue";
-            ctx.fillStyle = "blue";
+            setStrokeAndFillStyle("blue");
+        }
+        if (currentArrowID == protoArrow.id) {
+            setStrokeAndFillStyle("green");
         }
 
         if (protoArrow.originID != protoArrow.destID) {
@@ -156,9 +163,8 @@ function drawProtoArrows () {
                 ctx.fillText(protoArrow.displayString, loopTextCenter.x, loopTextCenter.y);
             }
         }
-        if (isHighlighting) {
-            ctx.strokeStyle = "black";
-            ctx.fillStyle = "black";
+        if (isHighlighting || currentArrowID == protoArrow.id) {
+            setStrokeAndFillStyle("black");
         }
     }
 }

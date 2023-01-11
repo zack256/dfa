@@ -504,9 +504,9 @@ function updateWordStateChain () {
     let wordTBody = document.getElementById("wordTBody");
     if (currentStateID == 0) {
         clearing = true;
-        startStateP.innerHTML = "???";
+        startStateP.innerHTML = "Start State: ???";
     } else {
-        startStateP.innerHTML = protoStateMap.get(currentStateID).name;
+        startStateP.innerHTML = "Start State: " + protoStateMap.get(currentStateID).name;
     }
     for (let i = 0; i < wordTBody.children.length; i++) {
         if (clearing) {
@@ -538,6 +538,19 @@ function updateWordStateChain () {
                 clearing = true;
                 wordTBody.children[i].children[3].innerHTML = "???";
             }
+        }
+    }
+}
+
+function wordChainRenameState (oldName, newName) {
+    let startStateP = document.getElementById("simulateStartStateP");
+    let wordTBody = document.getElementById("wordTBody");
+    if (startStateP.innerHTML == "Start State: " + oldName) {
+        startStateP.innerHTML = "Start State: " + newName;
+    }
+    for (let i = 0; i < wordTBody.children.length; i++) {
+        if (wordTBody.children[i].children[3].innerHTML == oldName) {
+            wordTBody.children[i].children[3].innerHTML = newName;
         }
     }
 }

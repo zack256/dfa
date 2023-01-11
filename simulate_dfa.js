@@ -1,4 +1,5 @@
 let currentStateID = 0;
+let currentArrowID = 0;
 
 let sleepInterval = 1000;   // ms
 
@@ -46,14 +47,17 @@ async function simulateDFA (word=null) {
     let wordTBody = document.getElementById("wordTBody");
     for (let i = 0; i < word.length; i++) {
         await sleep(sleepInterval);
-        let nextArrowID = deltaFunc.get(currentStateID).get(letterIDs[i]);
-        currentStateID = protoStateMap.get(protoArrowMap.get(nextArrowID).destID).id;
+        currentArrowID = deltaFunc.get(currentStateID).get(letterIDs[i]);
+        currentStateID = protoStateMap.get(protoArrowMap.get(currentArrowID).destID).id;
         wordTBody.children[i].classList.add("simulatingLetter");
         if (i != 0) {
             wordTBody.children[i - 1].classList.remove("simulatingLetter");
         }
     }
     await sleep(sleepInterval);
-    wordTBody.children[word.length - 1].classList.remove("simulatingLetter");
+    if (word.length) {
+        wordTBody.children[word.length - 1].classList.remove("simulatingLetter");
+    }
     currentStateID = 0;
+    currentArrowID = 0;
 }

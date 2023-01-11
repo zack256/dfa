@@ -137,6 +137,7 @@ function controlChangeStateName () {
         alert("A state already has the name \"" + newName + "\"!");
         return;
     }
+    wordChainRenameState(oldName, newName);
     protoStateNames.delete(oldName);
     protoStateNames.set(newName, CS[1]);
     ps.name = newName;
